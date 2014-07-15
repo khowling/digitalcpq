@@ -1,0 +1,86 @@
+
+<div class="large-9 medium-9 column">
+
+    <div class="row">
+
+        <div class="large-12 columns">
+            <div class="row collapse">
+
+                <div class="small-8 columns">
+                    <input type="text" ng-model="searchtxt" ng-change="search(searchtxt)"
+                           placeholder="Search for..." />
+                </div>
+                <div class="small-4 columns">
+                    <!--  <span class="postfix">.com</span> -->
+                    <button class="button postfix" ng-click="search(searchtxt)">Search</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- results -->
+    <div class="row" ng-repeat="o1 in results">
+        <div class="large-2 small-2 columns">
+          <!--  <img ng-src="https://eu2.salesforce.com/sfc/servlet.shepherd/version/download/{{o1.ThumbImageId__c}}"> -->
+            <a class="tiny button" ng-href="#/home?customer={{o1.soupEntryId}}">Select</a>
+        </div>
+        <div class="large-10 small-10 columns">
+            <p style="font-size: 80%; margin-bottom: 5px;">
+                <p>{{o1.Name}} ({{o1.Account.Name}})</p>
+                  {{o1.MailingPostalCode}}
+            </p>
+
+
+            <ul class="inline-list" style="margin-left: 0px; margin-bottom: 5px;">
+                <li style=""><i class="fi-mail"><span style="margin-left: 5px; font-size: 90%;" >{{o1.Email}}</span></i></li>
+                <li style=""><i class="fi-mobile-signal"><span style="margin-left: 5px; font-size: 90%;" >{{o1.MobilePhone}}</span></i></li>
+            </ul>
+        </div>
+        <hr tyle="margin-top: 0px;" />
+    </div>
+
+    <div class="row" ng-show="!shownewform && offercreate">
+        <div class="large-12 small-12 columns">
+            <!--  <img ng-src="https://eu2.salesforce.com/sfc/servlet.shepherd/version/download/{{o1.ThumbImageId__c}}"> -->
+            <button class="tiny expand" ng-click="shownewform = true; NewCustomer.Name = searchtxt">Create <strong>{{searchtxt}}</strong></button>
+        </div>
+    </div>
+    <div class="row" ng-show="shownewform">
+        <div class="large-12 small-12 columns">
+            <div ng-form name="newcustomer" >
+                <div  class="small-12 columns">
+                    <label>Name</label>
+                    <input type="text" ng-model="NewCustomer.Name" placeholder="ie John Smith" ng-required="true"/>
+
+                </div>
+                <div  class="small-12 columns">
+                    <label>Mobile</label>
+                    <input type="text" ng-model="NewCustomer.MobilePhone" placeholder="ie +44 7777 12312" ng-required="true"/>
+
+                </div>
+                <div  class="small-12 columns">
+                    <label>Email</label>
+                    <input type="email" ng-model="NewCustomer.Email" placeholder="ie JSmith@gmail.com" ng-required="true"/>
+                </div>
+                <div  class="small-12 columns">
+                    <label>Company Name</label>
+                    <input type="text" ng-model="NewCustomer.Account.Name" placeholder="ie TelUK LTD" ng-required="true"/>
+                </div>
+                <div  class="small-12 columns">
+                    <label>Mailing PostCode</label>
+                    <input type="text" ng-model="NewCustomer.MailingPostalCode" placeholder="ie SL6 3HF" ng-required="true"/>
+                </div>
+                <div class="alert" ng-show="errorStr" ng-bind="errorStr"/>
+                <div class="large-12 columns">
+                    <ul class="button-group">
+                        <li><button ng-click="submit()"  ng-disabled="newcustomer.$invalid" type="submit" class="button tiny">Save</button></li>
+                        <li><button ng-click="shownewform = false" class="tiny">Cancel</button></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>

@@ -1,0 +1,97 @@
+<style>
+
+    .doneit {
+        background: #33b96e !important;
+        color: white!important;
+    }
+    .notdoneit {
+        background: #5b5b5b !important;
+        color: white!important;
+    }
+     .nopadrow {
+         padding-left: 0px;
+         padding-right: 0px;
+         line-height: 1.1;
+     }
+
+</style>
+
+
+
+<div class="row">
+    <div class="large-12 columns small-12">
+
+        <dl class="accordion" ng-init="accordion= {}"  data-accordion>
+
+            <dd  style="">
+                <div class="row">
+                    <div class="columns small-3">
+                        <img ng-src="{{product.imgsrc}}">
+                    </div>
+                    <div class="small-9 columns">
+                        <p style="margin: 5px;"><span ng-bind="product.Name"/> ({{product.RecordType.Name}})</p>
+                        <hr style="margin: 5px;"/>
+                        Configured Price <i class="fi-pound" style="font-size: 18px; margin: 2px;"></i><span ng-bind="product.configuredprice"/>
+                    </div>
+
+                </div>
+                <button ng-click="toggleAccordion('_Desc')" class="radius  expand" style="color: black; background-color: white; border: solid 1px #222;">
+                    Expand details
+                    <i class="right" style="font-size: 20px; margin-right: 10px;" ng-class="{'fi-zoom-out': accordion['_Desc'], 'fi-magnifying-glass': !accordion['_Desc'] }"></i>
+
+                </button>
+                <div  id="panelContent_Desc" class="content" style="padding: 0px;">
+
+                    <div class="row"   ng-click="toggleAccordion(_Desc)"  style="border: solid 1px #c6c6c6; border-top: 0px;">
+                        <div class="large-12"><span ng-bind-html="getRichDescroption()"></span></div>
+                    </div>
+
+                </div>
+            </dd>
+
+            <dd   ng-repeat="fieldnm in configJson[product.RecordType.Name] track by fieldnm.name" style="border: solid 1px white;">
+                <a class="row" ng-click="toggleAccordion(fieldnm.name)" style="vertical-align: middle; padding: 1px;" ng-class="{'doneit': productConfig[fieldnm.name], 'notdoneit': !productConfig[fieldnm.name]}" >
+
+                    <div class="columns small-5">
+                        <i style="font-size: 28px; float: left;" class="fi-{{fieldnm.icon}}"></i>
+                        <div style="float:left; margin-left: 5px; margin-top: 10px;"  ng-bind="fieldnm.name"/>
+
+                    </div>
+                    <div class="columns small-6 " >
+                         <div style="margin-top: 10px;" ng-hide="productConfig[fieldnm.name]">
+                            (<span ng-bind="fieldnm.values.length"></span>)
+                        </div>
+                        <div  ng-show="productConfig[fieldnm.name]" class="panel" style="margin: 1px 0 0 0;padding: .60rem; background: #009900;" ng-bind="productConfig[fieldnm.name]"/>
+
+                    </div>
+                    <div class="columns small-1 right "  style="padding: 0px;">
+                        <i style="font-size: 28px; margin-right: 10px;" ng-class="{'fi-check': productConfig[fieldnm.name], 'fi-arrow-up': (accordion[fieldnm.name] && !productConfig[fieldnm.name]), 'fi-arrow-down': (!accordion[fieldnm.name] && !productConfig[fieldnm.name])}"></i>
+                    </div>
+                </a>
+                <div  id="panelContent{{fieldnm.name}}" class="content" style="padding: 0px;">
+
+                    <div class="row" ng-repeat="valnm in fieldnm.values"  ng-click="addselection(fieldnm.name, valnm.name);" ng-class="{'alert-box warning round' : isFilterSelected(fieldnm, valnm)}" style="border: solid 1px #c6c6c6; border-top: 0px;">
+
+                        <div class="small-2 columns nopadrow" style="padding: 5px;"><img ng-src="{{valnm.imgsrc}}"/></div>
+                        <div class="small-3 columns nopadrow"  style="margin-top: 10px;"><span style="" ng-bind="valnm.name"/></div>
+                        <div class="small-5 columns nopadrow" style="margin-top: 8px; font-size: 90%; " ><span  ng-bind="valnm.desc"/></div>
+                        <div class="small-2 columns nopadrow" style="margin-top: 12px;" ><i class="fi-pound" style="font-size: 18px; margin: 2px;"></i><span style="font-size: 90%;" ng-bind="valnm.price"/></div>
+                    </div>
+
+                </div>
+            </dd>
+        </dl>
+        <div class="row">
+            <div class="large-12" style="border: solid 1px white;">
+                <button class="button expand" ng-disabled="!enableaddtocart" ng-click="addtobasket()" ng-class="{'doneit': enableaddtocart, 'notdoneit': !enableaddtocart}">add to basket</button>
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+
+
+
+

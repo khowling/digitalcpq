@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>My AngularJS App</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="bower_components/foundation/css/normalize.css"/>
+    <link rel="stylesheet" href="bower_components/foundation/css/foundation.css"/>
+    <link rel="stylesheet" href="bower_components/foundation-icon-fonts/foundation-icons.css" />
+
+    <link rel="stylesheet" href="css/style.css"/>
+    <script src="bower_components/foundation/js/vendor/modernizr.js"></script>
+
+	 	<script	src="cordova-2.3.0.js" type="text/javascript"></script>
+	 	<script	src="cordova.force.js" type="text/javascript"></script>
+</head>
+<body>
+
+<div class="off-canvas-wrap" data-offcanvas>
+
+    <div class="fixed off-canvas-fixed">
+
+        <!-- top nav for small only -->
+        <div class=" fixed show-for-medium-down">
+            <nav class="tab-bar " style="background: white; border-bottom: 1px solid #dbdbdb;">
+
+                <section class="left-small" style="border-right: 0px;">
+                    <a class="left-off-canvas-toggle" ><i class="fi-list" style="font-size: 25px; margin: 10px;"></i></a>
+                </section>
+
+                <section class="middle tab-bar-section">
+									<div class="row collapse">
+										<div class="large-8 small-8 columns">
+										   <h6><a href="#">
+										            <img src="http://www.mindatrest.co.uk/images/cirrusglobe.png" style="height: 30px;"/>
+										    <a href="#">Digital SME</a>
+											</h6>
+										</div>
+										<div class="large-4 small-4 columns">
+											<div class="switch1" style="margin-top: 5px;">
+											  <input id="exampleCheckboxSwitch" type="checkbox" ng-model="online">
+											  <label for="exampleCheckboxSwitch"></label>
+											</div>
+											</div>
+									</div>
+                </section>
+
+
+                <section class="right tab-bar-section" style="left: auto; border-left: 0px;">
+                    <a href="/#basket" class=" button radius" style="padding: 5px 20px;">
+                        <i class="fi-shopping-cart" style="font-size: 18px;margin-right: 5px;"></i><i class="fi-pound" style="font-size: 10px; margin: 2px;"></i><span ng-bind="selected | sumbasket"/> (<span ng-bind="selected.length">)</span>
+                    </a>
+                </section>
+
+            </nav>
+        </div>
+
+        <!-- left menu for small only -->
+        <aside class="left-off-canvas-menu">
+            <ul class="off-canvas-list" >
+                <li><label>Digital Quote</label></li>
+                <li><a class="left-off-canvas-toggle" href="#/">Home</a></li>
+                <li><a class="left-off-canvas-toggle" href="#/customer">customer</a></li>
+                <li><a class="left-off-canvas-toggle" href="#/search">Search</a></li>
+                <li><a class="left-off-canvas-toggle" href="#/basket">Basket</a></li>
+                <li><a class="left-off-canvas-toggle" href="#/packages">Offers</a></li>
+                
+            </ul>
+        </aside>
+    </div>
+
+    <div class="inner-wrap">
+
+
+
+        <!-- top nav for medium large only -->
+        <nav class="tab-bar hide-for-medium-down" data-topbar="" style="background: white; border-bottom: 1px solid #dbdbdb;">
+
+
+            <section class="middle tab-bar-section">
+                <h6><a href="#">
+                    <img src="http://www.mindatrest.co.uk/images/cirrusglobe.png" style="height: 30px;"/>
+                    <a href="#">Digital SME</a>
+                </h6>
+            </section>
+            
+            <section class="right tab-bar-section" style="left: auto;">
+								 <div class="switch1" style="margin-top: 5px;">
+								  <input id="exampleCheckboxSwitch" type="checkbox" ng-model="online">
+								  <label for="exampleCheckboxSwitch"></label>
+								</div>
+            </section>
+
+        </nav>
+
+
+        <div style="height: 55px;"></div>
+
+        <!-- The Model when adding things to a cart -->
+        <style> .firstModal:before {
+            content: "";
+            border: inset 6px;
+            border-color: transparent transparent #fff transparent;
+            border-bottom-style: solid;
+            position: absolute;
+            top: -12px;
+            left: 90%;
+            z-index: 99;
+        }</style>
+
+        <div class="firstModal reveal-modal tiny" data-reveal style="left: 50%;  width: 45%;  top: 50px; min-height: 270px;">
+            <p>Your Item has been added to the Shopping Cart</p>
+            <hr/>
+            <a class="button expand " href="#/search" onclick="jQuery('.firstModal').foundation('reveal', 'close');">continue shopping</a>
+            <button class="expand" onclick="#">Checkout</button>
+
+        </div>
+
+        <div class="row collapse">
+						
+            <!-- LEFT THIRD -->
+            <div class="hide-for-medium-down large-3  column">
+                <div class="panel" ng-if="!sf">
+                    <a class="button expand " href="#/customer"><i class="fi-male" style="font-size: 30px; margin: 2px;"></i> Find Customer</a>
+                </div>
+
+                <div class="slide-animate" ng-include="'partials/basket.html'"></div>
+
+                <div class="panel" ng-if="sf">
+                    <a href="#"><img ng-src="{{sf.context.user.profilePhotoUrl}}" /></a>
+                    <hr/>
+                    <h4 ng-bind="sf.context.user.fullName"></h4>
+                </div>
+            </div>
+
+            <!-- RIGHT TWO THIRDS -->
+            <div class="large-9 medium-12 column" ng-controller="TabNavCntrl">
+                <div class="ngViewContainer">
+                    <div  class="ng-view view-animate"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="bower_components/foundation/js/vendor/jquery.js"></script>
+<script src="bower_components/foundation/js/foundation.min.js"></script>
+<script>
+    $(document).foundation();
+</script>
+
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-route/angular-route.min.js"></script>
+<script src="bower_components/angular-resource/angular-resource.min.js"></script>
+<script src="bower_components/angular-animate/angular-animate.min.js"></script>
+<script src="bower_components/angular-cookies/angular-cookies.min.js"></script>
+<script src="js/module-sfdata.js"></script>
+<script src="js/productsearchctrl.js"></script>
+<script src="js/configure.js"></script>
+<script src="js/customer.js"></script>
+
+
+<script>
+    /*
+     * POST https://login.salesforce.com/services/oauth2/token
+     * DATA: grant_type=password&client_id=3MVG99qusVZJwhskfsiYZz9vAn3iWjp4V79_irNpsQl9yNiuTCogBf9YkZH_OK9JmP_hdODiXWhX6RqC.RaH4&client_secret=
+     2294924384309051352&username=khowling%40telco.dev&password=password123
+    *
+    */
+    var _sfdccreds = {
+        sf_userid: '{!$User.Id}',
+        sf_host_url: 'https://eu2.salesforce.com',
+        static_resource_url: './static_resources',
+        sfdc_api_version: '/services/data/v30.0',
+        clientId: '3MVG99qusVZJwhskfsiYZz9vAn3iWjp4V79_irNpsQl9yNiuTCogBf9YkZH_OK9JmP_hdODiXWhX6RqC.RaH4',
+        session_api: '00Db0000000diWP!ARIAQLkWdfkPGSDG0i5th581Iw2fHKdpR6h2iJgmrWOiiJKPErDNDtuybA7uuZu1jXn3kVprTP7dXhFgEmGYrtZduyX4mKzg',
+        refresh_api: ''
+    	};
+
+
+    angular.module('myApp', ['ngResource', 'ngRoute', 'ngAnimate', 'ngCookies', 'sfdata'])
+    	.config(['$routeProvider', function($routeProvider){
+        $routeProvider.
+                when('/', {
+                    templateUrl: 'partials/home.html',
+                    resolve: ensureSFDCDataServiceInitialised,
+                    controller: function ($scope, SFDCData) {
+                    	
+                    }
+                }).
+                when('/search', {
+                    templateUrl: 'partials/productsearch.html',
+                    controller: 'searchCtrl'
+                }).
+                when('/configure/:id', {
+                    templateUrl: 'partials/configure.html',
+                    controller: 'configureCtrl'
+                }).
+                when('/packages', {
+                    templateUrl: 'partials/packages.html'
+                }).
+                when('/basket', {
+                    templateUrl: 'partials/basket.html'
+                }).
+                when('/guided', {
+                    templateUrl: 'partials/guided.html',
+                    controller: 'searchCtrl'
+                }).
+                when('/customer', {
+                    templateUrl: 'partials/customer.html',
+                    controller: 'custCntl'
+                }).
+                otherwise({
+                    redirectTo: '/phones'
+                });
+    }]).filter('split', function() {
+        return function(input, delimiter) {
+            var delimiter = delimiter || ',';
+
+            return input.split(delimiter);
+        }
+    }).filter('sfnametolabel', function() {
+        return function(input) {
+            try {
+                return input.replace ('__c', '').replace(/_/g, ' ');
+            } catch (e) {
+                return 'NO VALUE*';
+            }
+        }
+    }).filter('sumbasket', function() {
+        return function(input) {
+            try {
+                var sumret = 0;
+                for (var i in input) {
+                    sumret+= input[i].configuredprice;
+                }
+                return sumret;
+            } catch (e) {
+                return 'NO VALUE*';
+            }
+        }
+    }).run(function(SFDCData, $rootScope, $location, $http, $cookies, $cookieStore) {
+
+    		$rootScope.selected = []; // selected iteam in basket
+	    	$rootScope.online = SFDCData.getOnline();
+	    	
+	    	$rootScope.$watch('online', function(val) {
+	    		console.log ('setting only to  : ' + val);
+	    		SFDCData.setOnline(val);
+	    	});
+
+       if ($cookies.sfcontext) {
+           // we are in the canvas context!
+           console.log ($cookies.sfcontext);
+           $rootScope.sf = angular.fromJson ($cookies.sfcontext);
+           $cookieStore.remove("sfcontext");
+       }
+
+        
+        try {
+
+            $http.get('/sfsession').then (function (res) {
+                $rootScope.access_token = res.data.access_token ;
+                $rootScope.instanceUrl = res.data.instance_url;
+            })
+
+        //    var sr = JSON.parse('{{{signedreq}}}');
+            // set instanceUrl for links to salesforce objects
+        //    $rootScope.instanceUrl = sr.client.instanceUrl;
+        //    $rootScope.access_token = sr.client.oauthToken;
+        //    $rootScope.targetOrigin = sr.client.targetOrigin;
+
+            // lookup the client the order is for
+            var clientid = sr.context.environment.parameters.id;
+            var client_url = sr.context.links.sobjectUrl + 'Contact/' + clientid + '/';
+            Sfdc.canvas.client.ajax(
+                    client_url,
+                    {client : sr.client,
+                        success : function(data){
+                            // Make sure the status code is OK.
+                            $rootScope.$apply(function(){
+                                console.log ("response  "   + data.payload.Name);
+                                $rootScope.contact = data.payload;
+                            });
+                        }});
+        } catch (e) {
+            console.log ('no Signed Request');
+            $rootScope.instanceUrl = "https://eu2.salesforce.com";
+        }
+
+    });
+
+    function TabNavCntrl ($scope,$location) {
+        $scope.isActive = function (viewLocation) {
+            return viewLocation === $location.path();
+        };
+        $scope.changeView = function(view){
+            $('.absolute').toggleClass('showsidebar');
+            $location.path(view); // path not hash
+        }
+    }
+</script>
+
+</body>
+</html>

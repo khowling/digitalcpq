@@ -1,0 +1,31 @@
+<div class="panel">
+	<h5>Basket</h5>
+	<a href="#"><img src="/img/sim-card.jpg" /></a>
+	
+	<ul class="side-nav">
+		<li  ng-repeat="sel in selected" style="line-height:1; padding:0; margin-top: 5px;">
+			<div class="row collapse">
+			  <div class="small-9 columns">
+			 		<a ng-click="rmSelected($index);" style="padding: 0px;"><div ng-bind="sel.Name"/></a>
+                    <div ng-repeat="(n, v) in sel.config" ng-bind="v" class="label success round" style="margin: 2px;"/>
+			 	</div>
+			 	<div class="small-2 columns">
+                    <i class="fi-pound" style="font-size: 18px; margin: 2px;"></i><span ng-bind="sel.configuredprice"/>
+			    </div>
+		  </div>
+		</li>
+
+        <li  style="line-height:1; padding:0; margin-top: 5px;">
+            <div class="row collapse">
+                <div class="small-9 columns">
+                    Total
+                </div>
+                <div class="small-2 columns">
+                    <i class="fi-pound" style="font-size: 18px; margin: 2px;"></i><span ng-bind="selected | sumbasket"/>
+                </div>
+            </div>
+        </li>
+
+	</ul>
+	<button ng-show="selected.length > 0" ng-click="insertSFDC()" style="width: 100%; margin-top: 5px;">Place Order</button>
+</div>
