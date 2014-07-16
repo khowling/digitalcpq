@@ -1,7 +1,9 @@
 // used to inject a constant value
 angular.module('sfdata.constants', []).constant ('soups', [
     {name: 'Contact', 
-    	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"},{"path":"Account.Name","type":"string"}]}
+    	indexSpec:[{"path":"Id","type":"string"},{"path":"LastName","type":"string"},{"path":"Company__c","type":"string"}]},
+	{name: 'Product__c', 
+    	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"}]}
 ]);
 
 // Services are registered to modules via the Module API. Typically you use the Module#factory API to register a service
@@ -17,6 +19,7 @@ angular.module('sfdata.service', ['sfdata.constants'])
         var _smartstore
         var _online = true;
         
+        // ----------------------- registerSoups function
         var registerSoups = function(smartstore) {
             console.log ('registerSoups ' + angular.toJson(soups));
             var registerPromises = [];
@@ -45,6 +48,7 @@ angular.module('sfdata.service', ['sfdata.constants'])
             });
         };
         
+        // ----------------------- setupOauthCreds from cordova plugin
         var setupOauthCreds = function(sfdcoauth) {
         	var deferredOauth = $q.defer();
             var success = function (val) {
@@ -65,6 +69,15 @@ angular.module('sfdata.service', ['sfdata.constants'])
         var cordovaDeffer = $q.defer(),
             _resolved = false;
         
+     // ----------------------- resolveCordova, call once we finished the cordova plugins initialisation, or if we're on the web
+        var resolveCordova = function (cordova) {
+        	console.log ('resolveCordova : ' + _resolved);
+        	if (!_resolved) {
+        		_resolved = true;
+    			cordovaDeffer.resolve(cordova);
+    		}
+        }
+        // ----------------------- cordovaReady, run when we have the ok device ready from cordova
         var cordovaReady = function (cordova) {
         	
             _sfdcoauth = cordova.require("salesforce/plugin/oauth");
@@ -75,8 +88,7 @@ angular.module('sfdata.service', ['sfdata.constants'])
             	console.log ('calling registerSoups');
             	registerSoups (_smartstore).then ( function () {
             		console.log  ('done, resolve cordova init');
-            		_resolved = true;
-        			cordovaDeffer.resolve(cordova);
+            		resolveCordova (cordova);
             	})
             });
         }
@@ -86,9 +98,12 @@ angular.module('sfdata.service', ['sfdata.constants'])
         	console.log ('got cordova deviceready');
         	cordovaReady(window.cordova);	
         });
-        // after 3seconds, Check to make sure we didn't miss the event (just in case)
-        //setTimeout(function() {  if (!_resolved && window.cordova) { 	cordovaReady(window.cordova);  }}, 3000);
-
+        /* after 2seconds, Check to make sure we didn't miss the event (just in case)
+        setTimeout(function() {  
+        	if (!_resolved && window.cordova) { 	
+        		cordovaReady(window.cordova);  
+        		}}, 2000);
+		*/
 
         // ----------------------- query function
         var _query = function(obj, fields , where) {
@@ -126,7 +141,7 @@ angular.module('sfdata.service', ['sfdata.constants'])
         			if (where && where.like) {
         				qspec = _smartstore.buildLikeQuerySpec (where.field, where.like + "%", null, 100);
         			} else {
-        				qspec = _smartstore.buildAllQuerySpec ('Name', null, 100);
+        				qspec = _smartstore.buildAllQuerySpec ('LastName', null, 100);
         			}
         			
         			var success = function (val) {
@@ -159,11 +174,19 @@ angular.module('sfdata.service', ['sfdata.constants'])
         	}
         	
         	if (_online) {
-        		return $http.post(pth  + "/sobjects/" + obj + "/", objdata, {
+        		console.log ('online upsert');
+        		var olDeffer = $q.defer();
+        		
+        		$http.post(pth  + "/sobjects/" + obj + "/", objdata, {
 	                    headers: {  'Authorization': 'OAuth ' + sess  }
-	                }).then (function (results) {
-	                	return results;
+	                }).success (function (results) {
+	                	console.log ('success resolve : ' + angular.toJson(results));
+	                	olDeffer.resolve(results); 
+	               }).error (function (results) {
+	                	console.log ('error resolve : ' + angular.toJson(results));
+	                	olDeffer.resolve(results[0]); 
 	                });
+        		return olDeffer.promise;
         	} else {
         		console.log ('offline upsert');
         		var ssDeffer = $q.defer();
@@ -175,7 +198,7 @@ angular.module('sfdata.service', ['sfdata.constants'])
                     }
                     var error = function (val) { 
                     	console.log  ('upsertSoupEntries error ' + angular.toJson(val));
-                    	ssDeffer.reject(val);  
+                    	ssDeffer.resolve(val);  
                     }
         			upsertSoupEntries (obj, [objdata], success, error)
         		} else {
@@ -189,6 +212,7 @@ angular.module('sfdata.service', ['sfdata.constants'])
         return {
         	isInitialised: function() { return _resolved; },
 	    	cordovaDeffer: cordovaDeffer,
+	    	resolveCordova: resolveCordova,
 	    	setOnline: function(val) { _online = val; },
 	    	getOnline: function() { return _online; },
 	        getCreds: function() { return _creds; },
@@ -197,9 +221,11 @@ angular.module('sfdata.service', ['sfdata.constants'])
 	    }
     }])
     //Use this method to register work which needs to be performed on module loading
-    .config(function () { console.log('config function');})
+    .config(function () { //console.log('sfdata.service config function');
+    	})
     // Use this method to register work which should be performed when the injector is done loading all modules
-    .run(function(){ console.log('run function');   });
+    .run(function(){ //console.log('sfdata.service run function'); 
+    	});
 
 // A module is a collection of services, directives, controllers, filters, and configuration information
 angular.module('sfdata', ['sfdata.service', 'sfdata.constants']);

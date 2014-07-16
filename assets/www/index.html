@@ -122,9 +122,24 @@
 						
             <!-- LEFT THIRD -->
             <div class="hide-for-medium-down large-3  column">
-                <div class="panel" ng-if="!sf">
+            
+                <div class="panel" ng-show="!selectedCustomer">
                     <a class="button expand " href="#/customer"><i class="fi-male" style="font-size: 30px; margin: 2px;"></i> Find Customer</a>
                 </div>
+                
+                <div class="panel" ng-show="selectedCustomer">
+                    <label >Name</label>
+						        <p>{{selectedCustomer.FirstName}} {{selectedCustomer.LastName}}</p>
+						        <hr />
+						        <label >Company</label>
+						        <p>{{selectedCustomer.Company__c}}</p>
+						        <hr />
+						        <label >Id</label>
+						        <p>{{selectedCustomer.Id}} {{selectedCustomer._soupEntryId}}</p>
+						        <hr />
+                    <button class="expand " ng-click="selectedCustomer = null;">Reset</button>
+                </div>
+                
 
                 <div class="slide-animate" ng-include="'partials/basket.html'"></div>
 
@@ -176,7 +191,7 @@
         static_resource_url: './static_resources',
         sfdc_api_version: '/services/data/v30.0',
         clientId: '3MVG99qusVZJwhskfsiYZz9vAn3iWjp4V79_irNpsQl9yNiuTCogBf9YkZH_OK9JmP_hdODiXWhX6RqC.RaH4',
-        session_api: '00Db0000000diWP!ARIAQLkWdfkPGSDG0i5th581Iw2fHKdpR6h2iJgmrWOiiJKPErDNDtuybA7uuZu1jXn3kVprTP7dXhFgEmGYrtZduyX4mKzg',
+        session_api: '00Db0000000diWP!ARIAQJh3Ik0vIgRKnT020.gWE8DD6MjTbp8bhm.9Y4mL.Y4uteRJ37rqujcQ1FvKkQqx903kyg9zGyyCk7gDw2hd33Cgc9cV',
         refresh_api: ''
     	};
 
@@ -214,7 +229,7 @@
                     controller: 'custCntl'
                 }).
                 otherwise({
-                    redirectTo: '/phones'
+                    redirectTo: '/'
                 });
     }]).filter('split', function() {
         return function(input, delimiter) {
@@ -242,11 +257,17 @@
                 return 'NO VALUE*';
             }
         }
-    }).run(function(SFDCData, $rootScope, $location, $http, $cookies, $cookieStore) {
+    }).run(['SFDCData', '$rootScope', '$location', '$http', '$cookies', '$cookieStore', '$routeParams', function(SFDCData, $rootScope, $location, $http, $cookies, $cookieStore, $routeParams) {
 
     		$rootScope.selected = []; // selected iteam in basket
-	    	$rootScope.online = SFDCData.getOnline();
+    		$rootScope.selectedCustomer = null;
+    		
+				console.log ('running in website, so DONT wait for cordova ready? param : ' + document.URL.split('web=')[1] );
+	    	if (document.URL.split('web=')[1] == "1") {
+	    		SFDCData.resolveCordova(null);
+	    	}
 	    	
+	    	$rootScope.online = SFDCData.getOnline();
 	    	$rootScope.$watch('online', function(val) {
 	    		console.log ('setting only to  : ' + val);
 	    		SFDCData.setOnline(val);
@@ -291,7 +312,7 @@
             $rootScope.instanceUrl = "https://eu2.salesforce.com";
         }
 
-    });
+    }]);
 
     function TabNavCntrl ($scope,$location) {
         $scope.isActive = function (viewLocation) {

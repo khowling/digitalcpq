@@ -1,4 +1,4 @@
-var searchCtrl =  function ($resource, $scope, $rootScope, $location) {
+var searchCtrl =  function ($resource, $scope, $rootScope, $location, SFDCData) {
 
 
     angular.element(document).ready(function () {
@@ -38,7 +38,7 @@ var searchCtrl =  function ($resource, $scope, $rootScope, $location) {
     }
 	if (!urlfilters) $scope.setfilters = JSON.parse (urlfilters);
 	
-	$scope.data = data;
+	//$scope.data = data;
 	
 	$scope.isFilterSelected = function(fieldname, fieldval) {
 		//console.log ('isFilterSelected ' + fieldname + ' ' + fieldval);
@@ -88,9 +88,67 @@ var searchCtrl =  function ($resource, $scope, $rootScope, $location) {
 		'query':  {method:'GET', isArray:false}});
 	$scope.showerror = false; 
 
+	
+	/* new search */
+	$scope.facetorder = ['Type__c', 'Make__c', 'Available_Tariffs__c', 'Operating_system__c', 'Colour__c'];
+	$scope.search = function (stxt) {
+		
+		$scope.data = {};
+		
+		var sstr = stxt && stxt.txt;
+    	SFDCData.query("Product__c", "Id, Name, RecordType.Name, ThumbImage69Id__c,  Description__c, Type__c, Make__c, Available_Tariffs__c, Operating_system__c, Colour__c",  sstr && {field: 'Name', like: sstr} || null).then(function (data) {
+    		console.log ('controller : ' + angular.toJson(data));
+    		
+    		var local_facetresults = {};
+    		//var local_facetcounts = {};
+    		
+    		for (var ridx in data) {
+    			var rec = data[ridx];
+    			
+    			if (rec.Available_Tariffs__c) {
+    				rec.Available_Tariffs__c = rec.Available_Tariffs__c.split(',');
+    			}
+    			
+    			for (var facfldidx in $scope.facetorder) {
+    				var facfld = $scope.facetorder[facfldidx];
+    				console.log ('processing facet field: ' + facfld);
+
+    				if (rec[facfld] != null) {
+    					if (!local_facetresults[facfld]) {
+    						local_facetresults[facfld] = {};
+    					}
+    					console.log ('processing facet field, got value: ' + rec[facfld]);
+    					if (rec[facfld] instanceof Array) {
+    						console.log ('multi-facet field');
+    						for (var vidx in rec[facfld]) {
+    							var ffval = rec[facfld][vidx];
+    							console.log ('adding val : ' + facfld + ' : ' +  ffval);
+    							if (!local_facetresults[facfld][ffval])
+    								local_facetresults[facfld][ffval]  = 1;
+    							else
+    								local_facetresults[facfld][ffval]  += 1;
+    						}
+    					} else {
+    						console.log ('adding val : ' + facfld + ' : ' +  rec[facfld]);
+    						if (!local_facetresults[facfld][rec[facfld]]) 
+    							local_facetresults[facfld][rec[facfld]]  = 1 ;
+    						else
+    							local_facetresults[facfld][rec[facfld]]  += 1 ;
+    					}
+    				}
+    			}
+    		}
+    		
+    		$scope.data = { res:data, facetresults: local_facetresults};
+    	})
+    }
+	
+
+	
+	
 	/* data/action bindings */
-    $scope.facetorder = ['Type__c', 'Make__c', 'Available_Tariffs__c', 'Operating_system__c', 'Colour__c'];
-	$scope.search = function (s) {
+    
+	$scope.searchols = function (s) {
 		if (s == null) s = {};
 		if (s.txt == null || s.txt == '') s.txt = "*";
 		if (s.rows == null) s.rows = 50;
