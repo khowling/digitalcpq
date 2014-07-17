@@ -3,6 +3,8 @@ angular.module('sfdata.constants', []).constant ('soups', [
     {name: 'Contact', 
     	indexSpec:[{"path":"Id","type":"string"},{"path":"LastName","type":"string"},{"path":"Company__c","type":"string"}]},
 	{name: 'Product__c', 
+    	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"}]},
+	{name: 'Order__c', 
     	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"}]}
 ]);
 

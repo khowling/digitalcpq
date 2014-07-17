@@ -259,6 +259,19 @@
 	    	return true;
     	}
 	    $rootScope.resetBasket();
+	    
+	    $rootScope.insertSFDC = function() {
+	    	$scope.errorStr = null;
+	        SFDCData.insert("Order__c", {"Contact__c": $rootScope.selectedCustomer.Id,"OrderMetaData__c": angular.toJson($rootScope.selected)}).then(function (res) {
+	        	console.log ('got ' + angular.toJson(res));
+	        	if (res.id) {
+	        		jQuery('.firstModal').foundation('reveal', 'open');
+	        	} else if (res.message) { // array
+	        		$rootScope.errorStr  = res.message;
+	        	}
+	        });
+	    	
+	    }
     		
     	$rootScope.$on("$routeChangeSuccess", function(currentRoute, previousRoute){
     		    $rootScope.sidecart = true;
