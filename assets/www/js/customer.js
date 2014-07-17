@@ -4,7 +4,7 @@ var custCntl = function ($scope, $rootScope, $location, $http, SFDCData) {
     var online = true;
 
     $scope.search = function (stxt) {
-    	SFDCData.query("Contact", "Id, FirstName, LastName, Email, Company__c, MobilePhone, MailingPostalCode",  stxt && {field: 'LastName', like: stxt} || null).then(function (data) {
+    	SFDCData.query("Contact", "Id, FirstName, LastName, Email, Company__c, MobilePhone, MailingPostalCode",  stxt && [{field: 'LastName', like: stxt}] || null).then(function (data) {
     		console.log ('controller : ' + angular.toJson(data));
     		$scope.results =  data;
     	})

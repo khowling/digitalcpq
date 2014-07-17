@@ -118,16 +118,28 @@ angular.module('sfdata.service', ['sfdata.constants'])
         	
         	if (_online) {
         		var qstr = "SELECT " + fields + " FROM " + obj
-        		if (where && where.like) {
-        			qstr += " WHERE " +  where.field + " LIKE '" + where.like + "%25'"
+        		if (where) {
+        			for (var whereidx in where) {
+        				if (whereidx == 0) { 
+        					qstr += " WHERE ";
+        				} else {
+        					qstr += " AND ";
+        				}
+        				var whereitem = where[whereidx];
+        				if (whereitem.like)
+        					qstr += whereitem.field + " LIKE '" + whereitem.like + "%25'";
+        				else if (whereitem.equals)
+        					qstr += whereitem.field + " = '" + whereitem.equals + "'";
+        			}
         		}
+        		console.log ('running query : ' + qstr);
         		return $http.get(pth  + "/query/?q=" + qstr,
 	                    {
 	                        headers: {  'Authorization': 'OAuth ' + sess  }
 	                    }).then (function (results) {
 	                    	//console.log ('got ' + angular.toJson(results.data));
 	                    	if (_smartstore && results.data.records) {
-	                    		console.log ('save results for offline : ' + obj + ' : ' + angular.toJson(results.data.records));
+	                    		//console.log ('save results for offline : ' + obj + ' : ' + angular.toJson(results.data.records));
 	                    		_smartstore.upsertSoupEntriesWithExternalId(obj, results.data.records, "Id", function (val) { console.log ('upsert success: ' + angular.toJson(val));}, function (val) { console.log ('upsert error: ' + angular.toJson(val));});
 	                    	}
 	                    	return results.data.records;

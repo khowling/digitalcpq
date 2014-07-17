@@ -30,20 +30,24 @@
                     <a class="left-off-canvas-toggle" ><i class="fi-list" style="font-size: 25px; margin: 10px;"></i></a>
                 </section>
 
-                <section class="middle tab-bar-section">
-									<div class="row collapse">
-										<div class="large-8 small-8 columns">
+                <section class="middle tab-bar-section" style="right: 5rem;">
+									<div class="row collapse ">
+										<div class="large-4 small-4 columns">
 										   <h6><a href="#">
 										            <img src="http://www.mindatrest.co.uk/images/cirrusglobe.png" style="height: 30px;"/>
-										    <a href="#">Digital SME</a>
+										    <a href="#">Digital</a>
 											</h6>
+										</div>
+										<div class="large-4 small-4 columns">
+											<h5 class="subheading" style="color: black;" ng-bind="mode"/>
 										</div>
 										<div class="large-4 small-4 columns">
 											<div class="switch1" style="margin-top: 5px;">
 											  <input id="exampleCheckboxSwitch" type="checkbox" ng-model="online">
 											  <label for="exampleCheckboxSwitch"></label>
 											</div>
-											</div>
+										</div>
+										
 									</div>
                 </section>
 
@@ -82,15 +86,22 @@
             <section class="middle tab-bar-section">
                 <h6><a href="#">
                     <img src="http://www.mindatrest.co.uk/images/cirrusglobe.png" style="height: 30px;"/>
-                    <a href="#">Digital SME</a>
+                    <a href="#">Digital</a>
                 </h6>
             </section>
             
             <section class="right tab-bar-section" style="left: auto;">
-								 <div class="switch1" style="margin-top: 5px;">
-								  <input id="exampleCheckboxSwitch" type="checkbox" ng-model="online">
-								  <label for="exampleCheckboxSwitch"></label>
+							<div class="row collapse">
+								<div class="large-6 small-6 columns">
+									<h5 class="subheading" style="color: black;" ng-bind="mode"/>
 								</div>
+								<div class="large-6 small-6 columns">
+									<div class="switch1" style="margin-top: 5px;">
+									  <input id="exampleCheckboxSwitch" type="checkbox" ng-model="online">
+									  <label for="exampleCheckboxSwitch"></label>
+									</div>
+								</div>
+							</div>
             </section>
 
         </nav>
@@ -269,7 +280,8 @@
 	    	
 	    	$rootScope.online = SFDCData.getOnline();
 	    	$rootScope.$watch('online', function(val) {
-	    		console.log ('setting only to  : ' + val);
+	    		
+	    		$rootScope.mode = val && 'online' || 'offline';
 	    		SFDCData.setOnline(val);
 	    	});
 

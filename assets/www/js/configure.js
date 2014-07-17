@@ -1,17 +1,21 @@
 /**
  * Created by keith on 19/06/2014.
  */
-var configureCtrl =  function ($sce, $http, $routeParams,  $resource, $scope, $rootScope, $location) {
+var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, $scope, $rootScope, $location) {
 
     angular.element(document).ready(function () {
         jQuery(".ng-view").foundation();
     });
     //var url = ($rootScope.sf) && ($rootScope.sf.client.targetOrigin + $rootScope.sf.context.links.restUrl) || '/proxy';
     //console.log ('hitting : ' +url);
-    $http.get('/proxy' + '/query/?q=' + "select id, name, RecordType.Name, ThumbImage69Id__c,  Description__c from product__c where id = '" + $routeParams.id + "'")
-        .success(function (data) {
+    //$http.get('/proxy' + '/query/?q=' + "select id, name, RecordType.Name, ThumbImage69Id__c,  Description__c from product__c where id = '" + $routeParams.id + "'")
 
-            $scope.product = data.records[0];
+	SFDCData.query("Product__c", "Id, Name, RecordType.Name, Description__c, ThumbImage69Id__c, Type__c, Make__c, Available_Tariffs__c, Operating_system__c, Colour__c, ConfigMetaData__c",  [{field: "Id", equals: $routeParams.id}])
+    	.then(function (data) {
+
+            $scope.product = data[0];
+            console.log ('config meta : ' + $scope.product.ConfigMetaData__c);
+            $scope.productConfigMetaData = angular.fromJson($scope.product.ConfigMetaData__c);
             $scope.getRichDescroption =  function() {
                 return $sce.trustAsHtml($scope.product.Description__c);
             };

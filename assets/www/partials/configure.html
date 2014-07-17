@@ -49,7 +49,7 @@
                 </div>
             </dd>
 
-            <dd   ng-repeat="fieldnm in configJson[product.RecordType.Name] track by fieldnm.name" style="border: solid 1px white;">
+            <dd   ng-repeat="fieldnm in productConfigMetaData track by fieldnm.name" style="border: solid 1px white;">
                 <a class="row" ng-click="toggleAccordion(fieldnm.name)" style="vertical-align: middle; padding: 1px;" ng-class="{'doneit': productConfig[fieldnm.name], 'notdoneit': !productConfig[fieldnm.name]}" >
 
                     <div class="columns small-5">

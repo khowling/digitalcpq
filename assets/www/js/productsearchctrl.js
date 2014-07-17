@@ -93,14 +93,28 @@ var searchCtrl =  function ($resource, $scope, $rootScope, $location, SFDCData) 
 	$scope.facetorder = ['Type__c', 'Make__c', 'Available_Tariffs__c', 'Operating_system__c', 'Colour__c'];
 	$scope.search = function (stxt) {
 		
-		$scope.data = {};
 		
+		
+		// process filters 'search' & 'facets'
 		var sstr = stxt && stxt.txt;
-    	SFDCData.query("Product__c", "Id, Name, RecordType.Name, ThumbImage69Id__c,  Description__c, Type__c, Make__c, Available_Tariffs__c, Operating_system__c, Colour__c",  sstr && {field: 'Name', like: sstr} || null).then(function (data) {
+		console.log ('search() filters : ' + angular.toJson($scope.setfilters));
+		var filters = [];
+		if (sstr) {
+			filters.push ({field: 'Name', like: sstr});
+		}
+		for (var filtfld in $scope.setfilters) {
+			var filtvals = $scope.setfilters[filtfld];
+			for (var filtvalidx in filtvals) {
+				filters.push ({field: filtfld, equals: filtvals[filtvalidx]});
+			}
+		}
+		
+		// run search
+    	SFDCData.query("Product__c", "Id, Name, RecordType.Name, ThumbImage69Id__c, Type__c, Make__c, Available_Tariffs__c, Operating_system__c, Colour__c",  filters)
+    	  .then(function (data) {
     		console.log ('controller : ' + angular.toJson(data));
     		
     		var local_facetresults = {};
-    		//var local_facetcounts = {};
     		
     		for (var ridx in data) {
     			var rec = data[ridx];
@@ -111,25 +125,25 @@ var searchCtrl =  function ($resource, $scope, $rootScope, $location, SFDCData) 
     			
     			for (var facfldidx in $scope.facetorder) {
     				var facfld = $scope.facetorder[facfldidx];
-    				console.log ('processing facet field: ' + facfld);
+    				//console.log ('processing facet field: ' + facfld);
 
     				if (rec[facfld] != null) {
     					if (!local_facetresults[facfld]) {
     						local_facetresults[facfld] = {};
     					}
-    					console.log ('processing facet field, got value: ' + rec[facfld]);
+    					//console.log ('processing facet field, got value: ' + rec[facfld]);
     					if (rec[facfld] instanceof Array) {
     						console.log ('multi-facet field');
     						for (var vidx in rec[facfld]) {
     							var ffval = rec[facfld][vidx];
-    							console.log ('adding val : ' + facfld + ' : ' +  ffval);
+    							console.log ('adding facet val : ' + facfld + ' : ' +  ffval);
     							if (!local_facetresults[facfld][ffval])
     								local_facetresults[facfld][ffval]  = 1;
     							else
     								local_facetresults[facfld][ffval]  += 1;
     						}
     					} else {
-    						console.log ('adding val : ' + facfld + ' : ' +  rec[facfld]);
+    						console.log ('adding facet val : ' + facfld + ' : ' +  rec[facfld]);
     						if (!local_facetresults[facfld][rec[facfld]]) 
     							local_facetresults[facfld][rec[facfld]]  = 1 ;
     						else
