@@ -46,7 +46,7 @@ var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, 
             }
         }
     }
-
+/*
     $scope.configJson = {
      Device: [
          {   name: 'Tarrif',
@@ -115,7 +115,8 @@ var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, 
         }
         ]
     };
-
+*/
+    
     $scope.enableaddtocart = false;
     $scope.productConfig = { };
     $scope.addselection = function (category, val) {
@@ -123,8 +124,8 @@ var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, 
         $scope.toggleAccordion(category);
         var notfinished = false;
         $scope.product.configuredprice = 0;
-        for (var c in $scope.configJson[$scope.product.RecordType.Name]) {
-            var copt = $scope.configJson[$scope.product.RecordType.Name][c];
+        for (var c in $scope.productConfigMetaData) {
+            var copt = $scope.productConfigMetaData[c];
             if (copt.required && !$scope.productConfig[copt.name]) {
                 notfinished = true;
             } else {

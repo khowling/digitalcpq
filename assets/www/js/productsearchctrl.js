@@ -105,7 +105,7 @@ var searchCtrl =  function ($resource, $scope, $rootScope, $location, SFDCData) 
 		for (var filtfld in $scope.setfilters) {
 			var filtvals = $scope.setfilters[filtfld];
 			for (var filtvalidx in filtvals) {
-				filters.push ({field: filtfld, equals: filtvals[filtvalidx]});
+				filters.push ({field: filtfld, contains: filtvals[filtvalidx]});
 			}
 		}
 		

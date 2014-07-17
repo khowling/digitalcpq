@@ -128,6 +128,8 @@ angular.module('sfdata.service', ['sfdata.constants'])
         				var whereitem = where[whereidx];
         				if (whereitem.like)
         					qstr += whereitem.field + " LIKE '" + whereitem.like + "%25'";
+        				else if (whereitem.contains)
+        					qstr += whereitem.field + " LIKE '%25" + whereitem.contains + "%25'";
         				else if (whereitem.equals)
         					qstr += whereitem.field + " = '" + whereitem.equals + "'";
         			}

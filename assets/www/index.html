@@ -53,7 +53,7 @@
 
 
                 <section class="right tab-bar-section" style="left: auto; border-left: 0px;">
-                    <a href="/#basket" class=" button radius" style="padding: 5px 20px;">
+                    <a ng-href="#basket" class=" button radius" style="padding: 5px 20px;">
                         <i class="fi-shopping-cart" style="font-size: 18px;margin-right: 5px;"></i><i class="fi-pound" style="font-size: 10px; margin: 2px;"></i><span ng-bind="selected | sumbasket"/> (<span ng-bind="selected.length">)</span>
                     </a>
                 </section>
@@ -76,8 +76,6 @@
     </div>
 
     <div class="inner-wrap">
-
-
 
         <!-- top nav for medium large only -->
         <nav class="tab-bar hide-for-medium-down" data-topbar="" style="background: white; border-bottom: 1px solid #dbdbdb;">
@@ -109,7 +107,7 @@
 
         <div style="height: 55px;"></div>
 
-        <!-- The Model when adding things to a cart -->
+        <!------------------- The Model when adding things to a cart ------------------------>
         <style> .firstModal:before {
             content: "";
             border: inset 6px;
@@ -124,35 +122,19 @@
         <div class="firstModal reveal-modal tiny" data-reveal style="left: 50%;  width: 45%;  top: 50px; min-height: 270px;">
             <p>Your Item has been added to the Shopping Cart</p>
             <hr/>
-            <a class="button expand " href="#/search" onclick="jQuery('.firstModal').foundation('reveal', 'close');">continue shopping</a>
-            <button class="expand" onclick="#">Checkout</button>
+            <a class="button expand" href="#/search" onclick="jQuery('.firstModal').foundation('reveal', 'close');">continue shopping</a>
+            <a class="button expand" href="#/basket" onclick="jQuery('.firstModal').foundation('reveal', 'close');">Checkout</a>
 
         </div>
-
+        
+        
+				<!------------------------------- Main Page ---------------------------->
         <div class="row collapse">
 						
             <!-- LEFT THIRD -->
             <div class="hide-for-medium-down large-3  column">
-            
-                <div class="panel" ng-show="!selectedCustomer">
-                    <a class="button expand " href="#/customer"><i class="fi-male" style="font-size: 30px; margin: 2px;"></i> Find Customer</a>
-                </div>
-                
-                <div class="panel" ng-show="selectedCustomer">
-                    <label >Name</label>
-						        <p>{{selectedCustomer.FirstName}} {{selectedCustomer.LastName}}</p>
-						        <hr />
-						        <label >Company</label>
-						        <p>{{selectedCustomer.Company__c}}</p>
-						        <hr />
-						        <label >Id</label>
-						        <p>{{selectedCustomer.Id}} {{selectedCustomer._soupEntryId}}</p>
-						        <hr />
-                    <button class="expand " ng-click="selectedCustomer = null;">Reset</button>
-                </div>
-                
 
-                <div class="slide-animate" ng-include="'partials/basket.html'"></div>
+                <div class="slide-animate" ng-if="!sidecart" ng-include="'partials/basket.html'"></div>
 
                 <div class="panel" ng-if="sf">
                     <a href="#"><img ng-src="{{sf.context.user.profilePhotoUrl}}" /></a>
@@ -162,7 +144,7 @@
             </div>
 
             <!-- RIGHT TWO THIRDS -->
-            <div class="large-9 medium-12 column" ng-controller="TabNavCntrl">
+            <div class="large-9 medium-12 column">
                 <div class="ngViewContainer">
                     <div  class="ng-view view-animate"></div>
                 </div>
@@ -212,7 +194,7 @@
         $routeProvider.
                 when('/', {
                     templateUrl: 'partials/home.html',
-                    resolve: ensureSFDCDataServiceInitialised,
+             //       resolve: ensureSFDCDataServiceInitialised,
                     controller: function ($scope, SFDCData) {
                     	
                     }
@@ -268,23 +250,34 @@
                 return 'NO VALUE*';
             }
         }
-    }).run(['SFDCData', '$rootScope', '$location', '$http', '$cookies', '$cookieStore', '$routeParams', function(SFDCData, $rootScope, $location, $http, $cookies, $cookieStore, $routeParams) {
+    }).run(['SFDCData', '$rootScope', '$location', '$http', '$cookies', '$cookieStore', '$route', function(SFDCData, $rootScope, $location, $http, $cookies, $cookieStore, $route) {
 
-    		$rootScope.selected = []; // selected iteam in basket
-    		$rootScope.selectedCustomer = null;
+    	$rootScope.resetBasket = function () {
+    		console.log ('resetBasket');
+    		$rootScope.selectedCustomer = null; 
+    		$rootScope.selected = [];
+	    	return true;
+    	}
+	    $rootScope.resetBasket();
     		
-				console.log ('running in website, so DONT wait for cordova ready? param : ' + document.URL.split('web=')[1] );
-	    	if (document.URL.split('web=')[1] == "1") {
-	    		SFDCData.resolveCordova(null);
-	    	}
+    	$rootScope.$on("$routeChangeSuccess", function(currentRoute, previousRoute){
+    		    $rootScope.sidecart = true;
+    		    if ($route.current.loadedTemplateUrl !== "partials/basket.html") {
+    		    	$rootScope.sidecart = false;
+    		    }
+    	});
+    		
+			console.log ('running in website, so DONT wait for cordova ready? param : ' + document.URL.split('web=')[1] );
+	    if (document.URL.split('web=')[1] == "1") {
+	    	SFDCData.resolveCordova(null);
+	    }
 	    	
-	    	$rootScope.online = SFDCData.getOnline();
-	    	$rootScope.$watch('online', function(val) {
-	    		
-	    		$rootScope.mode = val && 'online' || 'offline';
-	    		SFDCData.setOnline(val);
-	    	});
-
+	    $rootScope.online = SFDCData.getOnline();
+	    $rootScope.$watch('online', function(val) {
+	    	$rootScope.mode = val && 'online' || 'offline';
+	    	SFDCData.setOnline(val);
+	    });
+/*
        if ($cookies.sfcontext) {
            // we are in the canvas context!
            console.log ($cookies.sfcontext);
@@ -323,18 +316,8 @@
             console.log ('no Signed Request');
             $rootScope.instanceUrl = "https://eu2.salesforce.com";
         }
-
+*/
     }]);
-
-    function TabNavCntrl ($scope,$location) {
-        $scope.isActive = function (viewLocation) {
-            return viewLocation === $location.path();
-        };
-        $scope.changeView = function(view){
-            $('.absolute').toggleClass('showsidebar');
-            $location.path(view); // path not hash
-        }
-    }
 </script>
 
 </body>
