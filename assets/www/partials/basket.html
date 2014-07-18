@@ -58,8 +58,8 @@
         </li>
 
 	</ul>
-	<div class="small-12 columns" ng-show="errorStr">
-   		<div class="alert-box alert"  ng-bind="errorStr"/>
+	<div class="small-12 columns" ng-show="saveErrorStr">
+   		<div class="alert-box alert"  ng-bind="saveErrorStr"/>
    </div> 
 	<ul class="button-group">
 		<li><button ng-show="selected.length > 0 && selectedCustomer" ng-click="insertSFDC();" >Place Order</button></li>

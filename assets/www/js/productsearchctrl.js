@@ -97,7 +97,7 @@ var searchCtrl =  function ($resource, $scope, $rootScope, $location, SFDCData) 
 		
 		// process filters 'search' & 'facets'
 		var sstr = stxt && stxt.txt;
-		console.log ('search() filters : ' + angular.toJson($scope.setfilters));
+		
 		var filters = [];
 		if (sstr) {
 			filters.push ({field: 'Name', like: sstr});
@@ -108,9 +108,9 @@ var searchCtrl =  function ($resource, $scope, $rootScope, $location, SFDCData) 
 				filters.push ({field: filtfld, contains: filtvals[filtvalidx]});
 			}
 		}
-		
+		console.log ('search() filters : ' + angular.toJson(filters));
 		// run search
-    	SFDCData.query("Product__c", "Id, Name, RecordType.Name, ThumbImage69Id__c, Type__c, Make__c, Available_Tariffs__c, Operating_system__c, Colour__c",  filters)
+    	SFDCData.query("Product__c", ["Id", "Name", "ThumbImage69Id__c", "Type__c", "Make__c", "Available_Tariffs__c", "Operating_system__c", "Colour__c"],  filters)
     	  .then(function (data) {
     		console.log ('controller : ' + angular.toJson(data));
     		

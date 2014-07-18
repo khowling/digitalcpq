@@ -1,12 +1,21 @@
 // used to inject a constant value
-angular.module('sfdata.constants', []).constant ('soups', [
-    {name: 'Contact', 
+//     	{"path":"Description__c","type":"string"}, {"path":"ThumbImage69Id__c","type":"string"}, {"path":"Type__c","type":"string"}, {"path":"Make__c","type":"string"}, {"path":"Available_Tariffs__c","type":"string"}, {"path":"Operating_system__c","type":"string"}, {"path":"Colour__c","type":"string"} 
+
+    	
+angular.module('sfdata.constants', []).constant ('soups', {
+    "Contact": { 
+    	primaryField: 'LastName',
+    	allFields: ["Id", "FirstName", "LastName", "Email", "Company__c", "MobilePhone", "MailingPostalCode"],
     	indexSpec:[{"path":"Id","type":"string"},{"path":"LastName","type":"string"},{"path":"Company__c","type":"string"}]},
-	{name: 'Product__c', 
-    	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"}]},
-	{name: 'Order__c', 
+	"Product__c": {
+		primaryField: 'Name',
+    	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"},
+    	           {"path":"Description__c","type":"string"}, {"path":"ThumbImage69Id__c","type":"string"}, {"path":"Type__c","type":"string"}, {"path":"Make__c","type":"string"}, {"path":"Available_Tariffs__c","type":"string"}, {"path":"Operating_system__c","type":"string"}, {"path":"Colour__c","type":"string"} 
+    	           ]},
+    "Order__c": {
+    	primaryField: 'Name',
     	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"}]}
-]);
+});
 
 // Services are registered to modules via the Module API. Typically you use the Module#factory API to register a service
 angular.module('sfdata.service', ['sfdata.constants'])
@@ -25,9 +34,8 @@ angular.module('sfdata.service', ['sfdata.constants'])
         var registerSoups = function(smartstore) {
             console.log ('registerSoups ' + angular.toJson(soups));
             var registerPromises = [];
-            for (s in soups) {
-                var sname = soups[s].name;
-                var idxes = soups[s].indexSpec;
+            for (var sname in soups) {
+                var idxes = soups[sname].indexSpec;
 
                 var deferred = $q.defer();
                 var success = function (val) {
@@ -109,6 +117,10 @@ angular.module('sfdata.service', ['sfdata.constants'])
 
         // ----------------------- query function
         var _query = function(obj, fields , where) {
+        	return _queryMode (obj, fields , where, _online)
+        }
+        
+        var _queryMode = function(obj, fields , where, mode) {
         	if (!_creds) {
         		console.log ('we dont have the credentials from the cordova container, so use hardwired!');
         		sess = _sfdccreds.session_api;
@@ -118,8 +130,26 @@ angular.module('sfdata.service', ['sfdata.constants'])
         		pth = _creds.instanceUrl + _sfdccreds.sfdc_api_version;
         	}
         	
-        	if (_online) {
-        		var qstr = "SELECT " + fields + " FROM " + obj
+        	var buildsql = function(obj, fields, smart) {
+        	
+        		var formatfld = function (obj, field, smart) {
+        			if (!smart)
+        				return field;
+        			else 
+        				return "{" + obj + ":" + field + "}";
+        		}
+        		
+        		var qstr = "SELECT ";
+        		for (var fidx in fields) {
+        			if (fidx >0) qstr += ", ";
+        			qstr += formatfld (obj, fields[fidx], smart)
+        		}
+        		
+        		if (!smart)
+        			qstr += " FROM " + obj;
+        		else 
+        			qstr += " FROM {" + obj + "}";
+        		
         		if (where) {
         			for (var whereidx in where) {
         				if (whereidx == 0) { 
@@ -128,15 +158,29 @@ angular.module('sfdata.service', ['sfdata.constants'])
         					qstr += " AND ";
         				}
         				var whereitem = where[whereidx];
+        				qstr += formatfld (obj, whereitem.field, smart)
         				if (whereitem.like)
-        					qstr += whereitem.field + " LIKE '" + whereitem.like + "%25'";
+        					if (!smart)
+        						qstr += " LIKE '" + whereitem.like + "%25'";
+        					else
+        						qstr += " LIKE '" + whereitem.like + "%'";
         				else if (whereitem.contains)
-        					qstr += whereitem.field + " LIKE '%25" + whereitem.contains + "%25'";
+        					if (!smart)
+        						qstr += " LIKE '%25" + whereitem.contains + "%25'";
+        					else
+        						qstr += " LIKE '%" + whereitem.contains + "%'";
         				else if (whereitem.equals)
-        					qstr += whereitem.field + " = '" + whereitem.equals + "'";
+        					qstr += " = '" + whereitem.equals + "'";
         			}
         		}
-        		console.log ('running query : ' + qstr);
+        		
+        		qstr += " ORDER BY " + formatfld (obj, soups[obj].primaryField, smart);
+        		return qstr;
+        	}
+        	
+        	if (mode) {
+        		var qstr = buildsql (obj, fields, false);
+        		console.log ('online running query : ' + qstr);
         		return $http.get(pth  + "/query/?q=" + qstr,
 	                    {
 	                        headers: {  'Authorization': 'OAuth ' + sess  }
@@ -149,29 +193,60 @@ angular.module('sfdata.service', ['sfdata.constants'])
 	                    	return results.data.records;
 	                    });
         	} else {
-        		console.log ('offline search');
         		var ssDeffer = $q.defer();
-        		
+        		console.log ('offline running query');
         		if (_smartstore) {
+        			
         			var qspec;
-        			if (where && where.like) {
-        				qspec = _smartstore.buildLikeQuerySpec (where.field, where.like + "%", null, 100);
-        			} else {
-        				qspec = _smartstore.buildAllQuerySpec ('LastName', null, 100);
+        			var smartqsl;
+        			
+        			if (!where || where.length == 0) {
+        				console.log ('offline search running buildAllQuerySpec');
+        				qspec = _smartstore.buildAllQuerySpec (soups[obj].primaryField, null, 100);
+        			}
+        			else if (where.length == 1 && where[0].equals) {
+        				console.log ('offline search running buildExactQuerySpec : ' + where[0].field + ' = ' + where[0].equals);
+        				qspec = _smartstore.buildExactQuerySpec (where[0].field, where[0].equals, null, 100);
+        			} 
+        			else if (where.length == 1 && where[0].like) {
+        				console.log ('offline search running buildLikeQuerySpec : ' + where[0].field + ' = ' + where[0].equals);
+        				qspec = _smartstore.buildLikeQuerySpec (where[0].field, where[0].like + "%", null, 100);
+        			} 
+        			else {
+        				// SmartQuery requires Everyfield to be indexed & ugly post processing ! the others do not!
+        				smartqsl = buildsql (obj, fields, true);
+        				console.log ('offline search running smartqsl : ' + smartqsl);
+        				qspec = _smartstore.buildSmartQuerySpec(smartqsl, 100);
         			}
         			
         			var success = function (val) {
                     	console.log ('querySoup got data ' + angular.toJson(val));
-                    	ssDeffer.resolve(val.currentPageOrderedEntries);  
+                    	if (smartqsl) { // using smartSQL, need to do some reconstruction UGH!!!
+                    		var results = [];
+                    		for (var rrecidx in val.currentPageOrderedEntries) {
+                    			var res = {},
+                    				rrec = val.currentPageOrderedEntries[rrecidx];
+                    			for (var fidx in fields) {
+                    				res[fields[fidx]] = rrec[fidx];
+                    			}
+                    			results.push (res);
+                    		}
+                    		ssDeffer.resolve(results);
+                    	} else {
+                    		ssDeffer.resolve(val.currentPageOrderedEntries);  
+                    	}
                     }
                     var error = function (val) { 
                     	console.log  ('querySoup error ' + angular.toJson(val));
                     	ssDeffer.reject(val);  
                     }
-                    
-        			_smartstore.querySoup(obj, qspec, success,error);
-        			
+                    if (smartqsl) {
+                    	_smartstore.runSmartQuery(qspec, success,error);
+                    } else {
+                    	_smartstore.querySoup(obj, qspec, success,error);
+                    }
         		} else {
+        			console.log ('Device offline & no smartstore');
         			ssDeffer.reject('Device offline & no smartstore'); 
         		}
         		return ssDeffer.promise;
@@ -189,38 +264,59 @@ angular.module('sfdata.service', ['sfdata.constants'])
         		pth = _creds.instanceUrl + _sfdccreds.sfdc_api_version;
         	}
         	
-        	if (_online) {
-        		console.log ('online upsert');
-        		var olDeffer = $q.defer();
-        		
-        		$http.post(pth  + "/sobjects/" + obj + "/", objdata, {
-	                    headers: {  'Authorization': 'OAuth ' + sess  }
-	                }).success (function (results) {
-	                	console.log ('success resolve : ' + angular.toJson(results));
-	                	olDeffer.resolve(results); 
-	               }).error (function (results) {
-	                	console.log ('error resolve : ' + angular.toJson(results));
-	                	olDeffer.resolve(results[0]); 
-	                });
-        		return olDeffer.promise;
-        	} else {
+        	var offlineUpsert = function (ol_obj, ol_objdata) {
         		console.log ('offline upsert');
         		var ssDeffer = $q.defer();
         		
         		if (_smartstore) {
         			var success = function (val) {
                     	console.log ('upsertSoupEntries got data ' + angular.toJson(val));
-                    	ssDeffer.resolve(val);  
+                    	ssDeffer.resolve(val[0]);  
                     }
                     var error = function (val) { 
                     	console.log  ('upsertSoupEntries error ' + angular.toJson(val));
                     	ssDeffer.resolve(val);  
                     }
-        			upsertSoupEntries (obj, [objdata], success, error)
+                    _smartstore.upsertSoupEntries (ol_obj, [ol_objdata], success, error)
         		} else {
         			ssDeffer.reject('Device offline & no smartstore'); 
         		}
         		return ssDeffer.promise;
+        	}
+        	
+        	if (_online) {
+        		console.log ('online upsert');
+        		var olDeffer = $q.defer();
+        		
+        		var clean_objdata = {},
+        			allFields = soups[obj].allFields;
+    			for (var fidx in allFields) {
+    				if (!(allFields[fidx] == 'Id' && objdata[allFields[fidx]] == 'LOCAL')) {
+    					clean_objdata[allFields[fidx]] = objdata[allFields[fidx]];
+    				}
+    			}
+        		
+        		$http.post(pth  + "/sobjects/" + obj + "/", clean_objdata, {
+	                    headers: {  'Authorization': 'OAuth ' + sess  }
+	                }).success (function (results) {
+	                	console.log ('online success resolve : ' + angular.toJson(results));
+	                	objdata.Id = results.Id
+	                	if (_smartstore) {
+	                		offlineUpsert (obj, objdata).then (function(offresults) {
+	                			olDeffer.resolve(offresults); 
+	                		});
+	                	} else {
+	                		olDeffer.resolve(results); 
+	                	}
+	               }).error (function (results) {
+	                	console.log ('error resolve : ' + angular.toJson(results));
+	                	olDeffer.resolve(results[0]); 
+	                });
+        		return olDeffer.promise;
+        	} else {
+        		objdata.Id = 'LOCAL';
+        		$rootScope.tosync +=  1;
+        		return offlineUpsert (obj, objdata);
         	}
         }
 
@@ -229,9 +325,42 @@ angular.module('sfdata.service', ['sfdata.constants'])
         	isInitialised: function() { return _resolved; },
 	    	cordovaDeffer: cordovaDeffer,
 	    	resolveCordova: resolveCordova,
-	    	setOnline: function(val) { _online = val; },
-	    	getOnline: function() { return _online; },
-	        getCreds: function() { return _creds; },
+	    	setOnline: function(val) { 
+	    		_online = val; 
+	    		// sync any new/updated customers/orders
+	    		if (val) {
+	    			var obj = "Contact",
+	    				allFields = soups[obj].allFields;
+	    			
+	    			_queryMode(obj, allFields,  [{field: 'Id', equals: 'LOCAL'}], false )
+			    		.then(function (data) {
+			    			$rootScope.tosync = data.length;
+			    			$rootScope.syncerrors = [];
+				    		console.log ('sync Contact : ' + angular.toJson(data));
+				    		for (var d in data) {
+
+	                			console.log ('upserting into ' + obj + ' : ' + angular.toJson(data[d]));
+				    			_insert(obj, data[d]).then (function (res) {
+			    					if (res.Id && res.Id !== 'LOCAL') {
+			    						$rootScope.tosync +=  -1;
+			    		        	} else { // array
+			    		        		var serr = 'Sync Error for ['+res._soupEntryId+']';
+			    		        		if (res.message) {
+			    		        			serr  += ': ' + res.message;
+			    		        		}
+			    		        		$rootScope.syncerrors.push (serr)
+			    		        	}
+				    			})
+				    		}
+				    	})
+	    		}
+	    	},
+	    	getOnline: function() { 
+	    		return _online; 
+	    	},
+	        getCreds: function() { 
+	        	return _creds; 
+	        },
 	        query: _query,
 	        insert: _insert
 	    }

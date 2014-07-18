@@ -10,7 +10,7 @@ var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, 
     //console.log ('hitting : ' +url);
     //$http.get('/proxy' + '/query/?q=' + "select id, name, RecordType.Name, ThumbImage69Id__c,  Description__c from product__c where id = '" + $routeParams.id + "'")
 
-	SFDCData.query("Product__c", "Id, Name, RecordType.Name, Description__c, ThumbImage69Id__c, Type__c, Make__c, Available_Tariffs__c, Operating_system__c, Colour__c, ConfigMetaData__c",  [{field: "Id", equals: $routeParams.id}])
+	SFDCData.query("Product__c", ["Id", "Name", "Description__c", "ThumbImage69Id__c", "Type__c", "Make__c", "Available_Tariffs__c", "Operating_system__c", "Colour__c", "ConfigMetaData__c"],  [{field: "Id", equals: $routeParams.id}])
     	.then(function (data) {
 
             $scope.product = data[0];
@@ -72,7 +72,7 @@ var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, 
     $scope.addtobasket = function() {
         $scope.product.config = $scope.productConfig;
         $rootScope.selected.push ($scope.product);
-        jQuery('.firstModal').foundation('reveal', 'open');
+        jQuery('#itemadded_modal').foundation('reveal', 'open');
 
     }
 

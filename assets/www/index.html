@@ -30,22 +30,25 @@
                     <a class="left-off-canvas-toggle" ><i class="fi-list" style="font-size: 25px; margin: 10px;"></i></a>
                 </section>
 
-                <section class="middle tab-bar-section" style="right: 5rem;">
+                <section class="middle tab-bar-section" style="right: 15rem;">
 									<div class="row collapse ">
-										<div class="large-4 small-4 columns">
+										<div class="medium-5 small-2 columns">
 										   <h6><a href="#">
 										            <img src="http://www.mindatrest.co.uk/images/cirrusglobe.png" style="height: 30px;"/>
-										    <a href="#">Digital</a>
+										    <span class=" show-for-medium" >Digital</span></a>
 											</h6>
 										</div>
-										<div class="large-4 small-4 columns">
-											<h5 class="subheading" style="color: black;" ng-bind="mode"/>
-										</div>
-										<div class="large-4 small-4 columns">
-											<div class="switch1" style="margin-top: 5px;">
+
+										<div class="medium-7 small-10 columns" style="white-space: nowrap;">
+									 
+											<div class="switch1 round" style="margin-top: 5px; float:right; height: 100%; display: inline-block">
 											  <input id="exampleCheckboxSwitch" type="checkbox" ng-model="online">
 											  <label for="exampleCheckboxSwitch"></label>
 											</div>
+											<h5 class="subheading" style="color: black;  height: 100%; float:right; margin-right: 10px; display: inline-block" ng-bind="mode"></h5>
+											<h5 style="float: right; line-height: 2.2rem;" class="success label" ng-bind="tosync"></h5>
+											<h5 style="float: right; line-height: 2.2rem;" class="alert label" ng-bind="syncerrors.length"></h5>
+											<div style="clear: both;"></div>
 										</div>
 										
 									</div>
@@ -54,7 +57,7 @@
 
                 <section class="right tab-bar-section" style="left: auto; border-left: 0px;">
                     <a ng-href="#basket" class=" button radius" style="padding: 5px 20px;">
-                        <i class="fi-shopping-cart" style="font-size: 18px;margin-right: 5px;"></i><i class="fi-pound" style="font-size: 10px; margin: 2px;"></i><span ng-bind="selected | sumbasket"/> (<span ng-bind="selected.length">)</span>
+                        {{selectedCustomer.FirstName}} {{selectedCustomer.LastName}}<i class="fi-shopping-cart" style="font-size: 18px;margin-left: 5px; margin-right: 5px;"></i><i class="fi-pound" style="font-size: 10px; margin: 2px;"></i><span ng-bind="selected | sumbasket"/> (<span ng-bind="selected.length">)</span>
                     </a>
                 </section>
 
@@ -66,10 +69,10 @@
             <ul class="off-canvas-list" >
                 <li><label>Digital Quote</label></li>
                 <li><a class="left-off-canvas-toggle" href="#/">Home</a></li>
-                <li><a class="left-off-canvas-toggle" href="#/customer">customer</a></li>
-                <li><a class="left-off-canvas-toggle" href="#/search">Search</a></li>
-                <li><a class="left-off-canvas-toggle" href="#/basket">Basket</a></li>
-                <li><a class="left-off-canvas-toggle" href="#/packages">Offers</a></li>
+                <li><a class="left-off-canvas-toggle" href="#/customer">Select Customer</a></li>
+                <li><a class="left-off-canvas-toggle" href="#/search">Product Search</a></li>
+                <li><a class="left-off-canvas-toggle" href="#/basket">Show Basket</a></li>
+                <li><a class="left-off-canvas-toggle" href="#/packages">Top Offers</a></li>
                 
             </ul>
         </aside>
@@ -119,14 +122,18 @@
             z-index: 99;
         }</style>
 
-        <div class="firstModal reveal-modal tiny" data-reveal style="left: 50%;  width: 45%;  top: 50px; min-height: 270px;">
+        <div id="itemadded_modal" class="firstModal reveal-modal tiny" data-reveal style="left: 50%;  width: 45%;  top: 50px; min-height: 270px;">
             <p>Your Item has been added to the Shopping Cart</p>
             <hr/>
-            <a class="button expand" href="#/search" onclick="jQuery('.firstModal').foundation('reveal', 'close');">continue shopping</a>
-            <a class="button expand" href="#/basket" onclick="jQuery('.firstModal').foundation('reveal', 'close');">Checkout</a>
-
+            <a class="button expand" href="#/search" onclick="jQuery('#itemadded_modal').foundation('reveal', 'close');">continue shopping</a>
+            <a class="button expand" href="#/basket" onclick="jQuery('#itemadded_modal').foundation('reveal', 'close');">Checkout</a>
         </div>
-        
+
+        <div id="orderconf_modal" class="firstModal reveal-modal tiny" data-reveal style="left: 50%;  width: 45%;  top: 50px; min-height: 270px;">
+            <p>Thank you for your Order, you will receive a confirmation email shortly with delivery details</p>
+            <hr/>
+            <a class="button expand" href="#/" onclick="jQuery('#orderconf_modal').foundation('reveal', 'close');">Continue</a>
+        </div>        
         
 				<!------------------------------- Main Page ---------------------------->
         <div class="row collapse">
@@ -252,6 +259,11 @@
         }
     }).run(['SFDCData', '$rootScope', '$location', '$http', '$cookies', '$cookieStore', '$route', function(SFDCData, $rootScope, $location, $http, $cookies, $cookieStore, $route) {
 
+    	// setup sync metrics
+    	$rootScope.tosync  = 0 ;
+    	$rootScope.syncerrors = [];
+    	
+    	// setup basket
     	$rootScope.resetBasket = function () {
     		console.log ('resetBasket');
     		$rootScope.selectedCustomer = null; 
@@ -261,15 +273,23 @@
 	    $rootScope.resetBasket();
 	    
 	    $rootScope.insertSFDC = function() {
-	    	$scope.errorStr = null;
-	        SFDCData.insert("Order__c", {"Contact__c": $rootScope.selectedCustomer.Id,"OrderMetaData__c": angular.toJson($rootScope.selected)}).then(function (res) {
-	        	console.log ('got ' + angular.toJson(res));
-	        	if (res.id) {
-	        		jQuery('.firstModal').foundation('reveal', 'open');
-	        	} else if (res.message) { // array
-	        		$rootScope.errorStr  = res.message;
-	        	}
-	        });
+	    	  $rootScope.saveErrorStr = null;
+	        SFDCData.insert("Order__c", {"Contact__c._soupEntryId": $rootScope.selectedCustomer._soupEntryId, "Contact__c.Id": $rootScope.selectedCustomer.Id,"OrderMetaData__c": angular.toJson($rootScope.selected)})
+	        	.then(function (res) {
+		        	console.log ('got ' + angular.toJson(res));
+		        	if (res.id) {
+		        		jQuery('#orderconf_modal').foundation('reveal', 'open');
+		        		$rootScope.resetBasket();
+		        	} else if (res._soupEntryId) {
+		        		jQuery('#orderconf_modal').foundation('reveal', 'open');
+		        		$rootScope.resetBasket();
+		        	} else  { // array
+		        		$scope.saveErrorStr = 'Didnt Save';
+		        		if (res.message) {
+		        			$scope.saveErrorStr  += ': ' + res.message;
+		        		}
+		        	}
+	         });
 	    	
 	    }
     		
