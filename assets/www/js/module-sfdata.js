@@ -14,7 +14,10 @@ angular.module('sfdata.constants', []).constant ('soups', {
     	           ]},
     "Order__c": {
     	primaryField: 'Name',
-    	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"}]}
+    	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"}],
+    	allFields: ["Id", "Contact__c","OrderMetaData__c"],
+    	childLookupFields: { "Contact__c": "Contact"}
+    	}
 });
 
 // Services are registered to modules via the Module API. Typically you use the Module#factory API to register a service
@@ -254,7 +257,7 @@ angular.module('sfdata.service', ['sfdata.constants'])
         }	
         
         // ----------------------- insert function
-        var _insert = function(obj, objdata) {
+        var _insert = function(obj, objdata, dependentSoupToId) {
         	if (!_creds) {
         		console.log ('we dont have the credentials from the cordova container, so use hardwired!');
         		sess = _sfdccreds.session_api;
@@ -289,10 +292,31 @@ angular.module('sfdata.service', ['sfdata.constants'])
         		var olDeffer = $q.defer();
         		
         		var clean_objdata = {},
-        			allFields = soups[obj].allFields;
+        			allFields = soups[obj].allFields,
+        			childLookupFields = soups[obj].childLookupFields || {};
+        			
     			for (var fidx in allFields) {
-    				if (!(allFields[fidx] == 'Id' && objdata[allFields[fidx]] == 'LOCAL')) {
-    					clean_objdata[allFields[fidx]] = objdata[allFields[fidx]];
+    				var f = allFields[fidx];
+    				if (f == 'Id' && objdata[f] == 'LOCAL') {
+    					console.log ('Its a Id field of value LOCAL, its a new insert, so dont add to clean object data');
+    				} else if (childLookupFields[f]) {
+    					console.log ('Its a Lookup field, check we have the lookup sfdc Id');
+						if (objdata[f]._soupEntryId) {
+	    					console.log ('I have lookup field with a _soupId ref, need to find the Id,  : ' + f + ', lookup to soup : ' + lookup_soup + '  : ' + objdata[f]._soupEntryId);
+	    					if (dependentSoupToId[obj] && dependentSoupToId[obj][objdata[f]._soupEntryId]) {
+	    						objdata[f] = dependentSoupToId[obj][objdata[f]._soupEntryId];
+	    						clean_objdata[f] = objdata[f];
+	    						console.log ('got it! : ' + objdata[f]);
+	    					} else {
+	    						console.log ('Fail, dont have a entry in the dependentSoupToId map :(');
+	    					}
+						} else if (objdata[f].Id) {
+    						console.log ('we already have a sfdc Id for the parent : ' + objdata[f].Id);
+    						objdata[f] = objdata[f].Id;
+    						clean_objdata[f] = objdata[f];
+    					}
+    				} else {
+    					clean_objdata[f] = objdata[f];
     				}
     			}
         		
@@ -329,8 +353,12 @@ angular.module('sfdata.service', ['sfdata.constants'])
 	    		_online = val; 
 	    		// sync any new/updated customers/orders
 	    		if (val) {
+	    			var soupToId = {};
+	    			
 	    			var obj = "Contact",
 	    				allFields = soups[obj].allFields;
+	    			
+	    			soupToId[obj] = {};
 	    			
 	    			_queryMode(obj, allFields,  [{field: 'Id', equals: 'LOCAL'}], false )
 			    		.then(function (data) {
@@ -342,6 +370,8 @@ angular.module('sfdata.service', ['sfdata.constants'])
 	                			console.log ('upserting into ' + obj + ' : ' + angular.toJson(data[d]));
 				    			_insert(obj, data[d]).then (function (res) {
 			    					if (res.Id && res.Id !== 'LOCAL') {
+			    						console.log ('Save soupToId, incase any child records have been created that references this parent: ' + soupToId[obj][data[d]._soupEntryId] + ' > ' + res.Id);
+			    						soupToId[obj][data[d]._soupEntryId] = res.Id;
 			    						$rootScope.tosync +=  -1;
 			    		        	} else { // array
 			    		        		var serr = 'Sync Error for ['+res._soupEntryId+']';

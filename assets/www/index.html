@@ -46,8 +46,8 @@
 											  <label for="exampleCheckboxSwitch"></label>
 											</div>
 											<h5 class="subheading" style="color: black;  height: 100%; float:right; margin-right: 10px; display: inline-block" ng-bind="mode"></h5>
-											<h5 style="float: right; line-height: 2.2rem;" class="success label" ng-bind="tosync"></h5>
-											<h5 style="float: right; line-height: 2.2rem;" class="alert label" ng-bind="syncerrors.length"></h5>
+											<h5 style="float: right; line-height: 1.5rem; margin-top:5px; margin-right: 10px;" class="success label" ng-show="tosync >0" ng-bind="tosync"></h5>
+											<h5 style="float: right; line-height: 1.5rem; margin-top:5px; margin-right: 10px;" class="alert label" ng-show="syncerrors.length >0" ng-bind="syncerrors.length"></h5>
 											<div style="clear: both;"></div>
 										</div>
 										

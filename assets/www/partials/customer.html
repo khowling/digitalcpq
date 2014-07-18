@@ -26,8 +26,8 @@
         </div>
         <div class="large-10 small-10 columns">
             <p style="font-size: 80%; margin-bottom: 5px;">
-                <p>{{o1.FirstName}} {{o1.LastName}} ({{o1.Company__c}})</p>
-                  {{o1.MailingPostalCode}}
+                <p>{{o1.FirstName}} {{o1.LastName}} ({{o1.Company__c}}) {{o1.MailingPostalCode}} <div class="label alert" ng-show="o1.Id == 'LOCAL'">LOCAL</div></p>
+                  
             </p>
 
 
