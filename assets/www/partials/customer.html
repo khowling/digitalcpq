@@ -1,8 +1,53 @@
+<style>
 
-<div class="large-9 medium-9 column">
+#gps-wait-spinner {
+  display: block;
+  z-index: 10002;
+  margin-top: 8px; 
+  margin-left: 47%
+}
 
-    <div class="row">
+#gps-wait-spinner .spinner-icon {
+  width: 20px;
+  height: 20px;
 
+  border:  solid 2px transparent;
+  border-top-color:  #cccccc;
+  border-left-color: #cccccc;
+  border-radius: 10px;
+
+  -webkit-animation: gps-wait-spinner 400ms linear infinite;
+  -moz-animation:    gps-wait-spinner 400ms linear infinite;
+  -ms-animation:     gps-wait-spinner 400ms linear infinite;
+  -o-animation:      gps-wait-spinner 400ms linear infinite;
+  animation:         gps-wait-spinner 400ms linear infinite;
+}
+
+@-webkit-keyframes gps-wait-spinner {
+  0%   { -webkit-transform: rotate(0deg);   transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+}
+@-moz-keyframes gps-wait-spinner {
+  0%   { -moz-transform: rotate(0deg);   transform: rotate(0deg); }
+  100% { -moz-transform: rotate(360deg); transform: rotate(360deg); }
+}
+@-o-keyframes gps-wait-spinner {
+  0%   { -o-transform: rotate(0deg);   transform: rotate(0deg); }
+  100% { -o-transform: rotate(360deg); transform: rotate(360deg); }
+}
+@-ms-keyframes gps-wait-spinner {
+  0%   { -ms-transform: rotate(0deg);   transform: rotate(0deg); }
+  100% { -ms-transform: rotate(360deg); transform: rotate(360deg); }
+}
+@keyframes gps-wait-spinner {
+  0%   { transform: rotate(0deg);   transform: rotate(0deg); }
+  100% { transform: rotate(360deg); transform: rotate(360deg); }
+}
+
+
+</style>
+
+    <div class="row" ng-hide="sync">
         <div class="large-12 columns">
             <div class="row collapse">
 
@@ -17,18 +62,35 @@
             </div>
         </div>
     </div>
+    
+    <div class="row" ng-show="sync">
+        <div class="large-12 columns">
+            <button ng-show="online" class="button expand" ng-click="syncout()" ng-disabled="waiting">
+            	<div ng-show="!waiting" style="line-height: 28px;" >Sync All</div>
+            	<div ng-if="waiting"  id="gps-wait-spinner"><div class="spinner-icon"></div></div>
+            </button>
+            
+           
+            
+            <div ng-show="!online" class="panel">Cannot Sync, You are not Online</div>
+            <div ng-show="results.length == 0" class="panel">Everything is Saved to Server</div>
+        </div>
+    </div>
 
     <!-- results -->
     <div class="row" ng-repeat="o1 in results">
         <div class="large-2 small-2 columns">
           <!--  <img ng-src="https://eu2.salesforce.com/sfc/servlet.shepherd/version/download/{{o1.ThumbImageId__c}}"> -->
-            <button class="tiny button" ng-click="selectCustomer(o1)">Select</button>
+            <button ng-hide="sync " class="tiny button" ng-click="selectCustomer(o1)">Select</button>
+            <button ng-show="sync && online" class="tiny button" ng-click="edit(o1)">Edit</button>
+            <p ng-show="sync && !online">Go online to sync</p>
         </div>
         <div class="large-10 small-10 columns">
             <p style="font-size: 80%; margin-bottom: 5px;">
-                <p>{{o1.FirstName}} {{o1.LastName}} ({{o1.Company__c}}) {{o1.MailingPostalCode}} <div class="label alert" ng-show="o1.Id == 'LOCAL'">LOCAL</div></p>
-                  
+                {{o1.FirstName}} {{o1.LastName}} ({{o1.Company__c}}) {{o1.MailingPostalCode}} <div class="label success" ng-show="o1.Id == 'LOCAL'">LOCAL</div>
             </p>
+            <p style="font-size: 70%; margin-bottom: 5px;">debug Id: {{o1.Id}} _soupEntryId {{o1._soupEntryId}}</p>
+            <div ng-show="syncinfo.errmsg['Contact-'+o1._soupEntryId]"  class="alert-box alert" ng-bind="syncinfo.errmsg['Contact-'+o1._soupEntryId]" />
 
 
             <ul class="inline-list" style="margin-left: 0px; margin-bottom: 5px;">
@@ -60,12 +122,12 @@
                 </div>
                 <div  class="small-12 columns">
                     <label>Mobile</label>
-                    <input type="text" ng-model="NewCustomer.MobilePhone" placeholder="ie +44 7777 12312" ng-required="true"/>
+                    <input type="text" ng-model="NewCustomer.MobilePhone" placeholder="ie +44 7777 12312" ng-required="false"/>
 
                 </div>
                 <div  class="small-12 columns">
                     <label>Email</label>
-                    <input type="email" ng-model="NewCustomer.Email" placeholder="ie JSmith@gmail.com" ng-required="true"/>
+                    <input type="email" ng-model="NewCustomer.Email" placeholder="ie JSmith@gmail.com" ng-required="false"/>
                 </div>
                 <div  class="small-12 columns">
                     <label>Company Name</label>
@@ -73,7 +135,7 @@
                 </div>
                 <div  class="small-12 columns">
                     <label>Mailing PostCode</label>
-                    <input type="text" ng-model="NewCustomer.MailingPostalCode" placeholder="ie SL6 3HF" ng-required="true"/>
+                    <input type="text" ng-model="NewCustomer.MailingPostalCode" placeholder="ie SL6 3HF" ng-required="false"/>
                 </div>
                 <div class="small-12 columns" ng-show="errorStr">
                 		<div class="alert-box alert"  ng-bind="errorStr"/>
@@ -88,6 +150,27 @@
         </div>
     </div>
 
+	<div class="row" ng-repeat="b in baskets">
+        <div class="large-2 small-2 columns">
+          <i class="fi-shopping-cart" style="margin-left: 10px; font-size: 28px;"></i>
+        </div>
+        <div class="large-10 small-10 columns">
+            <p style="font-size: 80%; margin-bottom: 5px;">
+               {{b.Contact__c}} {{b.OrderMetaData__c.product}} <div ng-repeat="odata in b.OrderMetaData__c">{{odata.config}} {{odata.price}}</div>  <div class="label success" ng-show="b.Id == 'LOCAL'">LOCAL</div>
+            </p>
+            <p style="font-size: 70%; margin-bottom: 5px;">debug Id: {{b.Id}} _soupEntryId {{b._soupEntryId}}</p>
+            <div ng-show="syncinfo.errmsg['Order__c-'+b._soupEntryId]"  class="alert-box alert" ng-bind="syncinfo.errmsg['Order__c-'+b._soupEntryId]" />
 
-
-</div>
+        </div>
+        <hr tyle="margin-top: 0px;" />
+    </div>
+    
+    <div class="row" >
+			<div class="large-12 columns">
+				<button ng-show="sync" class="button expand" ng-click="reinitialiseSoup()" ng-disabled="reinit_wait">
+				       	<div ng-show="!reinit_wait" style="line-height: 28px;" >WARNING: Clear Offline Storage</div>
+				       	<div ng-if="reinit_wait"  id="gps-wait-spinner"><div class="spinner-icon"></div></div>
+				</button>
+		  </div>
+    </div>
+    

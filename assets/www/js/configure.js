@@ -10,7 +10,7 @@ var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, 
     //console.log ('hitting : ' +url);
     //$http.get('/proxy' + '/query/?q=' + "select id, name, RecordType.Name, ThumbImage69Id__c,  Description__c from product__c where id = '" + $routeParams.id + "'")
 
-	SFDCData.query("Product__c", ["Id", "Name", "Description__c", "ThumbImage69Id__c", "Type__c", "Make__c", "Available_Tariffs__c", "Operating_system__c", "Colour__c", "ConfigMetaData__c"],  [{field: "Id", equals: $routeParams.id}])
+	SFDCData.query("Product__c", "*",  [{field: "Id", equals: $routeParams.id}])
     	.then(function (data) {
 
             $scope.product = data[0];
@@ -21,7 +21,7 @@ var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, 
             };
             $http.get('/proxy/chatter/files/' + $scope.product.ThumbImage69Id__c)
                 .success(function (cdata) {
-                        $scope.product.configuredprice = 0;
+                        $scope.productConfigPrice = 0;
                         $scope.product.imgsrc = 'https://eu2.salesforce.com' + cdata.downloadUrl;
 
             });
@@ -53,7 +53,7 @@ var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, 
         $scope.productConfig[category] = val;
         $scope.toggleAccordion(category);
         var notfinished = false;
-        $scope.product.configuredprice = 0;
+        $scope.productConfigPrice = 0;
         for (var c in $scope.productConfigMetaData) {
             var copt = $scope.productConfigMetaData[c];
             if (copt.required && !$scope.productConfig[copt.name]) {
@@ -61,7 +61,7 @@ var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, 
             } else {
                 for (vopt in copt.values) {
                     if (copt.values[vopt].name === $scope.productConfig[copt.name]) {
-                        $scope.product.configuredprice += copt.values[vopt].price;
+                        $scope.productConfigPrice += copt.values[vopt].price;
                     }
                 }
             }
@@ -70,8 +70,7 @@ var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, 
 
     }
     $scope.addtobasket = function() {
-        $scope.product.config = $scope.productConfig;
-        $rootScope.selected.push ($scope.product);
+        $rootScope.addBasket ($scope.product, $scope.productConfigPrice, $scope.productConfig);
         jQuery('#itemadded_modal').foundation('reveal', 'open');
 
     }

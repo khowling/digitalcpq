@@ -46,8 +46,8 @@
 											  <label for="exampleCheckboxSwitch"></label>
 											</div>
 											<h5 class="subheading" style="color: black;  height: 100%; float:right; margin-right: 10px; display: inline-block" ng-bind="mode"></h5>
-											<h5 style="float: right; line-height: 1.5rem; margin-top:5px; margin-right: 10px;" class="success label" ng-show="tosync >0" ng-bind="tosync"></h5>
-											<h5 style="float: right; line-height: 1.5rem; margin-top:5px; margin-right: 10px;" class="alert label" ng-show="syncerrors.length >0" ng-bind="syncerrors.length"></h5>
+											<a ng-href="#/customer?sync"> <h5 style="float: right; line-height: 1.5rem; margin-top:5px; margin-right: 10px;" class="success label" ng-show="syncinfo.tosync >0" ng-bind="syncinfo.tosync"></h5>
+											<h5 style="float: right; line-height: 1.5rem; margin-top:5px; margin-right: 10px;" class="alert label" ng-show="syncinfo.errcount >0" ng-bind="syncinfo.errcount"></h5></a>
 											<div style="clear: both;"></div>
 										</div>
 										
@@ -57,7 +57,7 @@
 
                 <section class="right tab-bar-section" style="left: auto; border-left: 0px;">
                     <a ng-href="#basket" class=" button radius" style="padding: 5px 20px;">
-                        {{selectedCustomer.FirstName}} {{selectedCustomer.LastName}}<i class="fi-shopping-cart" style="font-size: 18px;margin-left: 5px; margin-right: 5px;"></i><i class="fi-pound" style="font-size: 10px; margin: 2px;"></i><span ng-bind="selected | sumbasket"/> (<span ng-bind="selected.length">)</span>
+                        {{selectedCustomer.FirstName}} {{selectedCustomer.LastName}}<i class="fi-shopping-cart" style="font-size: 18px;margin-left: 5px; margin-right: 5px;"></i><i class="fi-pound" style="font-size: 10px; margin: 2px;"></i><span ng-bind="selectedBasket.total"/> (<span ng-bind="selectedBasket.items">)</span>
                     </a>
                 </section>
 
@@ -68,11 +68,12 @@
         <aside class="left-off-canvas-menu">
             <ul class="off-canvas-list" >
                 <li><label>Digital Quote</label></li>
-                <li><a class="left-off-canvas-toggle" href="#/">Home</a></li>
-                <li><a class="left-off-canvas-toggle" href="#/customer">Select Customer</a></li>
-                <li><a class="left-off-canvas-toggle" href="#/search">Product Search</a></li>
-                <li><a class="left-off-canvas-toggle" href="#/basket">Show Basket</a></li>
-                <li><a class="left-off-canvas-toggle" href="#/packages">Top Offers</a></li>
+                <li><a class="left-off-canvas-toggle" ng-href="#/">Home</a></li>
+                <li><a class="left-off-canvas-toggle" ng-href="#/customer">Select Customer</a></li>
+                <li><a class="left-off-canvas-toggle" ng-href="#/search">Product Search</a></li>
+                <li><a class="left-off-canvas-toggle" ng-href="#/basket">Show Basket</a></li>
+                <li><a class="left-off-canvas-toggle" ng-href="#/packages">Top Offers</a></li>
+                <li><hr/><a class="left-off-canvas-toggle" ng-href="#/customer?sync">Sync</a></li>
                 
             </ul>
         </aside>
@@ -191,7 +192,7 @@
         static_resource_url: './static_resources',
         sfdc_api_version: '/services/data/v30.0',
         clientId: '3MVG99qusVZJwhskfsiYZz9vAn3iWjp4V79_irNpsQl9yNiuTCogBf9YkZH_OK9JmP_hdODiXWhX6RqC.RaH4',
-        session_api: '00Db0000000diWP!ARIAQJh3Ik0vIgRKnT020.gWE8DD6MjTbp8bhm.9Y4mL.Y4uteRJ37rqujcQ1FvKkQqx903kyg9zGyyCk7gDw2hd33Cgc9cV',
+        session_api: '00Db0000000diWP!ARIAQNz.j2lWYZ.E6uK..7FHKFlbp5zYMgQiSWDsMLrdyQgRa8KI4Ubb6W5LaoXY.w8GMNKZf1x.1eP_2rXaQw3bkvRGUXg5',
         refresh_api: ''
     	};
 
@@ -245,36 +246,30 @@
                 return 'NO VALUE*';
             }
         }
-    }).filter('sumbasket', function() {
-        return function(input) {
-            try {
-                var sumret = 0;
-                for (var i in input) {
-                    sumret+= input[i].configuredprice;
-                }
-                return sumret;
-            } catch (e) {
-                return 'NO VALUE*';
-            }
-        }
     }).run(['SFDCData', '$rootScope', '$location', '$http', '$cookies', '$cookieStore', '$route', function(SFDCData, $rootScope, $location, $http, $cookies, $cookieStore, $route) {
 
     	// setup sync metrics
-    	$rootScope.tosync  = 0 ;
-    	$rootScope.syncerrors = [];
-    	
+    	SFDCData.initSyncinfo ();
+
     	// setup basket
     	$rootScope.resetBasket = function () {
     		console.log ('resetBasket');
     		$rootScope.selectedCustomer = null; 
-    		$rootScope.selected = [];
+    		$rootScope.selectedBasket = {total: 0.00, items: 0, product: [], payload: []};
 	    	return true;
     	}
 	    $rootScope.resetBasket();
 	    
+	    $rootScope.addBasket = function (product, productConfigPrice, productConfig) {
+	    	$rootScope.selectedBasket.total += productConfigPrice;
+	    	$rootScope.selectedBasket.items ++;
+	    	$rootScope.selectedBasket.product.push({product:  product, config: productConfig, price: productConfigPrice})
+	    	$rootScope.selectedBasket.payload.push({product:  product.Id, config: productConfig, price: productConfigPrice});
+	    }
+	    
 	    $rootScope.insertSFDC = function() {
 	    	  $rootScope.saveErrorStr = null;
-	        SFDCData.insert("Order__c", {"Contact__c._soupEntryId": $rootScope.selectedCustomer._soupEntryId, "Contact__c.Id": $rootScope.selectedCustomer.Id,"OrderMetaData__c": angular.toJson($rootScope.selected)})
+	        SFDCData.insert("Order__c", {"Contact__c": {"_soupEntryId": $rootScope.selectedCustomer._soupEntryId, "Id": $rootScope.selectedCustomer.Id } ,"OrderMetaData__c": angular.toJson($rootScope.selectedBasket.payload)})
 	        	.then(function (res) {
 		        	console.log ('got ' + angular.toJson(res));
 		        	if (res.id) {

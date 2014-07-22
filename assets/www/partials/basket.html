@@ -31,14 +31,14 @@
 	
 	
 	<ul class="side-nav">
-		<li  ng-repeat="sel in selected" style="line-height:1; padding:0; margin-top: 5px;">
+		<li  ng-repeat="sel in selectedBasket.product" style="line-height:1; padding:0; margin-top: 5px;">
 			<div class="row collapse">
 			  <div class="small-9 columns">
-			 		<a ng-click="rmSelected($index);" style="padding: 0px;"><div ng-bind="sel.Name"/></a>
+			 		<a ng-click="rmSelected($index);" style="padding: 0px;"><div ng-bind="sel.product.Name"/></a>
                     <div ng-repeat="(n, v) in sel.config" ng-bind="v" class="label success round" style="margin: 2px;"/>
 			 	</div>
 			 	<div class="small-2 columns">
-                    <i class="fi-pound" style="font-size: 18px; margin: 2px;"></i><span ng-bind="sel.configuredprice"/>
+                    <i class="fi-pound" style="font-size: 18px; margin: 2px;"></i><span ng-bind="sel.price"/>
 			    </div>
 		  </div>
 		</li>
@@ -49,7 +49,7 @@
                     Total
                 </div>
                 <div class="small-2 columns">
-                    <i class="fi-pound" style="font-size: 18px; margin: 2px;"></i><span ng-bind="selected | sumbasket"/>
+                    <i class="fi-pound" style="font-size: 18px; margin: 2px;"></i><span ng-bind="selectedBasket.total"/>
                 </div>
             </div>
         </li>
@@ -62,7 +62,7 @@
    		<div class="alert-box alert"  ng-bind="saveErrorStr"/>
    </div> 
 	<ul class="button-group">
-		<li><button ng-show="selected.length > 0 && selectedCustomer" ng-click="insertSFDC();" >Place Order</button></li>
-		<li><button ng-show="selected.length > 0 || selectedCustomer" ng-click="resetBasket();">Reset</button></li>
+		<li><button ng-show="selectedBasket.items > 0 && selectedCustomer" ng-click="insertSFDC();" >Place Order</button></li>
+		<li><button ng-show="selectedBasket.items > 0 || selectedCustomer" ng-click="resetBasket();">Reset</button></li>
 	</ul>
 </div>

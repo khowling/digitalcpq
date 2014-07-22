@@ -1,10 +1,8 @@
 
-var custCntl = function ($scope, $rootScope, $location, $http, SFDCData) {
+var custCntl = function ($scope, $rootScope, $location, $http, $routeParams, SFDCData) {
 
-    var online = true;
-
-    $scope.search = function (stxt) {
-    	SFDCData.query("Contact", ["Id", "FirstName", "LastName", "Email", "Company__c", "MobilePhone", "MailingPostalCode"],  stxt && [{field: 'LastName', like: stxt}] || null)
+	$scope.search = function (stxt) {
+    	SFDCData.query("Contact", "*",  stxt && [{field: 'LastName', like: stxt}] || null)
     		.then(function (data) {
 	    		console.log ('controller : ' + angular.toJson(data));
 	    		$scope.results =  data;
@@ -13,10 +11,68 @@ var custCntl = function ($scope, $rootScope, $location, $http, SFDCData) {
     		$scope.offercreate = true;
     	}
     }
-    
+	
+	var getLocal = function() {
+		SFDCData.queryLocal("Contact", "*",  [{field: 'Id', equals: 'LOCAL'}])
+		.then (function (data) {
+			console.log ('controller : ' + angular.toJson(data));
+			// get any sync error
+			$scope.results =  data;
+			SFDCData.queryLocal("Order__c", "*",  [{field: 'Id', equals: 'LOCAL'}])
+			.then (function (data) {
+				for (bidx in data) {
+					data[bidx].OrderMetaData__c = angular.toJson(data[bidx].OrderMetaData__c);
+				}
+				$scope.baskets =  data;
+			});
+		});
+	}
+	
+	if ($routeParams.sync) {
+		$scope.sync = true;
+		getLocal();
+	}
+	
+	$scope.edit = function (o1) {
+		$scope.NewCustomer = o1;
+		$scope.shownewform = true;
+	}
+	
+
     $scope.selectCustomer = function(cust) {
-    	$rootScope.selectedCustomer = cust;
-		$location.path( "/");
+    	if ($scope.sync == true) {
+    		// one less to sync
+    		$scope.shownewform = false;
+    		SFDCData.rmSyncError("Contact", cust._soupEntryId);
+
+    	} else {
+    		$rootScope.selectedCustomer = cust;
+    		$location.path( "/");
+    	}
+    }
+    $scope.reinitialiseSoup = function (){
+    	if (confirm("Are you sure!")) {
+    		$scope.reinit_wait = true;
+	    	SFDCData.reinitialiseSoup().then(function (val) {
+	    		$scope.reinit_wait = false;
+	    		alert (val);
+	    	});
+    	}
+    }
+    $scope.syncout = function() {
+    	$scope.waiting = true;
+    	
+    	SFDCData.initSyncinfo();
+    	SFDCData.syncup ("Contact").then(function () {
+    		SFDCData.syncup ("Order__c").then(function () {
+    			SFDCData.query ("Contact",  "*", null).then(function () {
+	    			SFDCData.query ("Product__c", "*", null).then(function () {
+	    				$scope.waiting = false;
+	    				getLocal();
+	    			});
+    			});
+    		});
+    	});
     }
 
     $scope.submit = function () {

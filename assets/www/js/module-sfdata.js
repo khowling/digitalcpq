@@ -10,8 +10,9 @@ angular.module('sfdata.constants', []).constant ('soups', {
 	"Product__c": {
 		primaryField: 'Name',
     	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"},
-    	           {"path":"Description__c","type":"string"}, {"path":"ThumbImage69Id__c","type":"string"}, {"path":"Type__c","type":"string"}, {"path":"Make__c","type":"string"}, {"path":"Available_Tariffs__c","type":"string"}, {"path":"Operating_system__c","type":"string"}, {"path":"Colour__c","type":"string"} 
-    	           ]},
+    	           {"path":"ThumbImage69Id__c","type":"string"}, {"path":"Type__c","type":"string"}, {"path":"Make__c","type":"string"}, {"path":"Available_Tariffs__c","type":"string"}, {"path":"Operating_system__c","type":"string"}, {"path":"Colour__c","type":"string"} ],
+    	allFields: ["Id", "Name", "Description__c", "ThumbImage69Id__c", "Type__c", "Make__c", "Available_Tariffs__c", "Operating_system__c", "Colour__c", "ConfigMetaData__c"]},
+    	           
     "Order__c": {
     	primaryField: 'Name',
     	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"}],
@@ -22,16 +23,119 @@ angular.module('sfdata.constants', []).constant ('soups', {
 
 // Services are registered to modules via the Module API. Typically you use the Module#factory API to register a service
 angular.module('sfdata.service', ['sfdata.constants'])
+	.factory( 'SFDCMockStore', ['soups',  function(soups) {
+	   	  
+		var _store = {};
+		// register soups
+		for (var sname in soups) {
+			_store[sname] = []; 
+		}
+		
+		var _find = function(obj, key, val) {
+			var sobjs = _store[obj];
+			if (val) {
+				//console.log ('_find, for each existing record ' + sobjs.length);
+				for (var i in sobjs) {
+					var r = sobjs[i];
+					//console.log ('_find, testing ' + r[key] + ' == ' + val);
+					if (r[key] == val) {
+						return i;
+					}
+				}
+			}
+			return -1;
+		}
+		var _upsert = function (obj, records, keyfld, success, error) {
+			console.log ('SFDCMockStore _upsert '+obj+' on : ' + keyfld);
+			  var sobjs = _store[obj];
+			  for (var r in records) {
+				  var rec = records[r];
+				  var exist = _find(obj, keyfld, rec[keyfld]);
+				  if (exist == -1) {
+					  console.log ('SFDCMockStore _upsert, inserting key record: ' + rec[keyfld]);
+					  rec._soupEntryId = sobjs.length +1;
+					  sobjs.push (rec);
+				  } else {
+					  console.log ('SFDCMockStore _upsert, updating existing key : ' + rec[keyfld]);
+					  // sobjs[exist] = rec
+					  // real store merges the data!
+					  for (elidx in rec) {
+						  sobjs[exist][elidx] = rec[elidx];
+					  }
+					  
+				  }
+			  }
+			  success (records);
+		  }
+		
 
+    	return {
+    		  registerSoup: function (sname, idxes, success, error) { 
+    			  console.log ('SFDCMockStore registerSoup : ' + sname);
+    			  _store[sname] = []; 
+    			  success(); 
+    		  },
+    		  removeSoup: function (sname, success, error) { 
+    			  console.log ('SFDCMockStore removeSoup : ' + sname);
+    			  _store[sname] = []; 
+    			  success(); 
+    		  },
+    		  upsertSoupEntries : function (obj, records, success, error) {
+    			  _upsert (obj, records, "_soupEntryId", success, error);
+    		  },
+    		  upsertSoupEntriesWithExternalId: _upsert,
+    		  buildAllQuerySpec: function(field, order, limi) {
+    			  return {};
+    		  },
+    		  buildExactQuerySpec: function(field, equals, order, limit) {
+    			  return {"field": field, "equals": equals};
+    		  },
+    		  buildLikeQuerySpec: function (field, like, order, limit) {
+    			  return {"field": field, "like": like.substring(0, like.length -1)};
+    		  },
+    		  buildSmartQuerySpec: function (smartqsl, limit) {
+    			  return {"smartsql": smartqsl};
+    		  },
+    		  runSmartQuery: function(qspec, success,error) {
+    			  // TODO
+    		  },
+    		  querySoup: function (obj, qspec, success,error) {
+    			  console.log ('SFDCMockStore querySoup : ' + obj +' : ' + angular.toJson (qspec));
+    			  var sobjs = _store[obj];
+    			  if (!qspec.field) {
+    				  success ( {currentPageOrderedEntries:angular.copy (sobjs)});
+    			  } else if (qspec.field) {
+  
+    				  var res = [];
+    				  for (var r in sobjs) {
+    					  var rec = sobjs[r];
+    					  var cval = rec[qspec.field];
+    					  if (cval) {
+    						  if (qspec.like && cval.indexOf(qspec.like) > -1) {
+    							  res.push (rec);
+    						  } else if (qspec.equals && qspec.equals == cval) {
+    							  res.push (rec);
+    						  }
+    					  }
+    				  }
+    				  success( {currentPageOrderedEntries: angular.copy (res)});
+    			  } else {
+    				  success ({currentPageOrderedEntries:[]});
+    			  }
+    		  }}
+	}])
     // component should explicitly define its dependencies dependency injection (DI)
-    .factory( 'SFDCData', ['soups', '$document', '$http', '$rootScope', '$q', function(soups, $document,  $http, $rootScope, $q) {
+    .factory( 'SFDCData', ['SFDCMockStore', 'soups', '$document', '$http', '$rootScope', '$q', function(SFDCMockStore, soups, $document,  $http, $rootScope, $q) {
         console.log('SFDCData service initialisation');
         
         // orgId, accessToken, userAgent, userId, identityUrl, communityUrl, refreshToken, clientId, instanceUrl, communityId
         var _creds;
         var _sfdcoauth;
-        var _smartstore
+        var _smartstore = SFDCMockStore;
         var _online = true;
+        
+        // HACK HERE 
+        var _xref = {};
         
         // ----------------------- registerSoups function
         var registerSoups = function(smartstore) {
@@ -52,7 +156,6 @@ angular.module('sfdata.service', ['sfdata.constants'])
 
                 console.log ('calling registerSoup for ' + sname + ', idx : ' + angular.toJson(idxes));
                 smartstore.registerSoup(sname, idxes, success, error);
-                //mockStore.registerSoup(sname, idxes, success, error);
                 registerPromises.push(deferred);
             }
 
@@ -60,6 +163,38 @@ angular.module('sfdata.service', ['sfdata.constants'])
             	console.log ('I am Finished registerSoup!');
             });
         };
+        
+        var reinitialiseSoup = function() {
+        	console.log ('reinitialiseSoup ');
+        	var deferredFinished = $q.defer();
+        	var registerPromises = [];
+            for (var sname in soups) {
+                
+
+                var deferred = $q.defer();
+                var success = function (val) {
+                	console.log ('success registerSoup ' + angular.toJson(val));
+                	deferred.resolve(val); 
+                }
+                var error = function (val) { 
+                	console.log ('error registerSoup ' + angular.toJson(val));
+                	deferred.reject(val); 
+                }
+
+                console.log ('calling removeSoup for ' + sname);
+                _smartstore.removeSoup(sname, success, error);
+                registerPromises.push(deferred);
+            }
+
+             $q.all(registerPromises).then(function () {
+            	 _initSyncinfo();
+            	registerSoups (_smartstore).then (function () {
+            		deferredFinished.resolve('I am Finished reinitialiseSoup');
+            	})
+            });
+            
+             return deferredFinished.promise;
+        }
         
         // ----------------------- setupOauthCreds from cordova plugin
         var setupOauthCreds = function(sfdcoauth) {
@@ -119,11 +254,15 @@ angular.module('sfdata.service', ['sfdata.constants'])
 		*/
 
         // ----------------------- query function
-        var _query = function(obj, fields , where) {
-        	return _queryMode (obj, fields , where, _online)
+        var query = function(obj, fields , where) {
+        	return _query (obj, fields , where, _online)
         }
         
-        var _queryMode = function(obj, fields , where, mode) {
+        var  queryLocal = function(obj, fields , where) {
+        	return _query (obj, fields , where, false)
+        }
+        
+        var _query = function(obj, fields , where, mode) {
         	if (!_creds) {
         		console.log ('we dont have the credentials from the cordova container, so use hardwired!');
         		sess = _sfdccreds.session_api;
@@ -131,6 +270,12 @@ angular.module('sfdata.service', ['sfdata.constants'])
         	} else {
         		sess = _creds.accessToken;
         		pth = _creds.instanceUrl + _sfdccreds.sfdc_api_version;
+        	}
+        	
+        	var allfieldsquery = false;
+        	if (!fields || fields == "*") {
+        		allfieldsquery = true;
+        		fields = soups[obj].allFields;
         	}
         	
         	var buildsql = function(obj, fields, smart) {
@@ -189,10 +334,19 @@ angular.module('sfdata.service', ['sfdata.constants'])
 	                        headers: {  'Authorization': 'OAuth ' + sess  }
 	                    }).then (function (results) {
 	                    	//console.log ('got ' + angular.toJson(results.data));
+	                    	
+	                    	/* DONT BOTH TRYING TO CACHE ALL ONLINE QUERY DATA, JUST USE SYNC */
 	                    	if (_smartstore && results.data.records) {
-	                    		//console.log ('save results for offline : ' + obj + ' : ' + angular.toJson(results.data.records));
-	                    		_smartstore.upsertSoupEntriesWithExternalId(obj, results.data.records, "Id", function (val) { console.log ('upsert success: ' + angular.toJson(val));}, function (val) { console.log ('upsert error: ' + angular.toJson(val));});
+	                    		if (allfieldsquery) {
+		                    		console.log ('get online results, save for offline (upsertSoupEntriesWithExternalId with "Id") : ' + obj);
+		                    		_smartstore.upsertSoupEntriesWithExternalId(obj, results.data.records, "Id", 
+		                    				function (val) { 
+		                    					console.log ('upsert success: ' + angular.toJson(val));
+		                    				}, function (val) { 
+		                    					console.log ('upsert error: ' + angular.toJson(val));});
+	                    		}
 	                    	}
+	                    	
 	                    	return results.data.records;
 	                    });
         	} else {
@@ -257,7 +411,7 @@ angular.module('sfdata.service', ['sfdata.constants'])
         }	
         
         // ----------------------- insert function
-        var _insert = function(obj, objdata, dependentSoupToId) {
+        var _insert = function(obj, objdata) {
         	if (!_creds) {
         		console.log ('we dont have the credentials from the cordova container, so use hardwired!');
         		sess = _sfdccreds.session_api;
@@ -268,19 +422,35 @@ angular.module('sfdata.service', ['sfdata.constants'])
         	}
         	
         	var offlineUpsert = function (ol_obj, ol_objdata) {
-        		console.log ('offline upsert');
+        		console.log ('offline upsertSoupEntries (uses _soupId)');
         		var ssDeffer = $q.defer();
         		
         		if (_smartstore) {
         			var success = function (val) {
                     	console.log ('upsertSoupEntries got data ' + angular.toJson(val));
-                    	ssDeffer.resolve(val[0]);  
+                    	
+                    	var val0 = val[0];
+                    	// HACK HERE
+                    	if (val0.Id !== "LOCAL") {
+                    		if (!_xref[ol_obj]) _xref[ol_obj] = {};
+                    		console.log ('_xref, adding _soupEntryId : '+ val0._soupEntryId +' Id: ' + val0.Id);
+                    		_xref[ol_obj][val0._soupEntryId] = { Id: val0.Id, Name: val0[soups[obj].primaryField]};
+                    	}
+                    	ssDeffer.resolve(val0);
+                    	
                     }
                     var error = function (val) { 
                     	console.log  ('upsertSoupEntries error ' + angular.toJson(val));
                     	ssDeffer.resolve(val);  
                     }
-                    _smartstore.upsertSoupEntries (ol_obj, [ol_objdata], success, error)
+                    if (ol_objdata.Id !== "LOCAL" && !ol_objdata._soupEntryId) {
+                    	
+                    	console.log ('_insert upsert soup using "Id" : '+ ol_objdata.Id);
+                    	_smartstore.upsertSoupEntriesWithExternalId (ol_obj, [ol_objdata], "Id", success, error);
+                    } else {
+                    	console.log ('_insert upsert soup using "_soupEntryId" : '+ ol_objdata._soupEntryId);
+	                    _smartstore.upsertSoupEntries (ol_obj, [ol_objdata], success, error);
+                    }
         		} else {
         			ssDeffer.reject('Device offline & no smartstore'); 
         		}
@@ -297,35 +467,53 @@ angular.module('sfdata.service', ['sfdata.constants'])
         			
     			for (var fidx in allFields) {
     				var f = allFields[fidx];
-    				if (f == 'Id' && objdata[f] == 'LOCAL') {
-    					console.log ('Its a Id field of value LOCAL, its a new insert, so dont add to clean object data');
+    				if (f == 'Id') {
+    					console.log ('Its a Id field so dont add to clean object data');
     				} else if (childLookupFields[f]) {
-    					console.log ('Its a Lookup field, check we have the lookup sfdc Id');
-						if (objdata[f]._soupEntryId) {
-	    					console.log ('I have lookup field with a _soupId ref, need to find the Id,  : ' + f + ', lookup to soup : ' + lookup_soup + '  : ' + objdata[f]._soupEntryId);
-	    					if (dependentSoupToId[obj] && dependentSoupToId[obj][objdata[f]._soupEntryId]) {
-	    						objdata[f] = dependentSoupToId[obj][objdata[f]._soupEntryId];
-	    						clean_objdata[f] = objdata[f];
-	    						console.log ('got it! : ' + objdata[f]);
-	    					} else {
-	    						console.log ('Fail, dont have a entry in the dependentSoupToId map :(');
-	    					}
-						} else if (objdata[f].Id) {
+    					var parentObject = childLookupFields[f];
+    					console.log ('Its a Lookup field, check we have the lookup sfdc Id: ' + f);
+						if (objdata[f].Id && objdata[f].Id !== 'LOCAL') {
     						console.log ('we already have a sfdc Id for the parent : ' + objdata[f].Id);
     						objdata[f] = objdata[f].Id;
     						clean_objdata[f] = objdata[f];
-    					}
+    						
+    					} else if (objdata[f]._soupEntryId) {
+	    					console.log ('I have lookup field with a _soupId ref, find Id : ' + f + ', parent Object: '+ parentObject +' lookup to soup : ' + objdata[f]._soupEntryId);
+	    					
+	    					// HACK - really should do a queryLocal here (obj, fields , where)
+	    					
+	    					if (_xref[parentObject] && _xref[parentObject][objdata[f]._soupEntryId]) {
+	    						objdata[f] = _xref[parentObject][objdata[f]._soupEntryId].Id;
+	    						clean_objdata[f] = objdata[f];
+	    						console.log ('got it! : ' + objdata[f]);
+	    					} else {
+	    						console.log ('Will let this Fail, dont have a entry in the dependentSoupToId map :(');
+	    					}
+	    					
+						} 
     				} else {
     					clean_objdata[f] = objdata[f];
     				}
     			}
-        		
-        		$http.post(pth  + "/sobjects/" + obj + "/", clean_objdata, {
+    			console.log ('online upsert of clean_objdata');
+    			var poststr = pth  + "/sobjects/" + obj + "/",
+    				method = "POST";
+    			if (objdata["Id"] && objdata["Id"] != 'LOCAL') {
+    				console.log ('We have a Id! so its a update');
+    				poststr += objdata["Id"];
+    				method = "PATCH";
+    			}
+    			
+        		$http({
+        				url: poststr,
+        				method: method,
+        				data: clean_objdata,
 	                    headers: {  'Authorization': 'OAuth ' + sess  }
 	                }).success (function (results) {
 	                	console.log ('online success resolve : ' + angular.toJson(results));
-	                	objdata.Id = results.Id
+	                	objdata.Id = results.id
 	                	if (_smartstore) {
+	                		console.log ('online success, now offlineUpsert');
 	                		offlineUpsert (obj, objdata).then (function(offresults) {
 	                			olDeffer.resolve(offresults); 
 	                		});
@@ -339,10 +527,63 @@ angular.module('sfdata.service', ['sfdata.constants'])
         		return olDeffer.promise;
         	} else {
         		objdata.Id = 'LOCAL';
-        		$rootScope.tosync +=  1;
+        		$rootScope.syncinfo.tosync++;
         		return offlineUpsert (obj, objdata);
         	}
         }
+        
+        var _initSyncinfo = function () {
+			$rootScope.syncinfo = { tosync: 0, errcount: 0, errmsg: {}};
+        }
+        var _addSyncError = function (obj, soupEntryId, errmsg) {
+        	$rootScope.syncinfo.errcount++;
+    		$rootScope.syncinfo.errmsg[obj+'-'+soupEntryId] = errmsg;
+        }
+        var _rmSyncError = function (obj, soupEntryId) {
+        	$rootScope.syncinfo.tosync--;
+        	if ($rootScope.syncinfo.errmsg[obj+'-'+soupEntryId]) {
+	        	$rootScope.syncinfo.errcount--;
+	    		$rootScope.syncinfo.errmsg[obj+'-'+soupEntryId] = null;
+        	}
+        }
+        //------------------------ sync offline records to server
+     	var _syncup = function (obj) {
+     		var deferredDone = $q.defer();
+
+			queryLocal(obj, "*",  [{field: 'Id', equals: 'LOCAL'}])
+	    		.then(function (data) {
+	    			$rootScope.syncinfo.tosync = $rootScope.syncinfo.tosync + data.length;
+		    		console.log ('sync '+obj+' : ' + angular.toJson(data));
+		    		var allPromises = [];
+		    		if (data.length >0) {
+			    		for (var d in data) {
+	            			console.log ('upserting into ' + obj + ' : ' + angular.toJson(data[d]));
+	            			allPromises.push (_insert(obj, data[d]).then (function (res) {
+		    					if (res.Id && res.Id !== 'LOCAL') {
+		    						$rootScope.syncinfo.tosync--;
+		    		        	} else { // array
+		    		        		var serr = 'Save error ';
+		    		        		if (res.message) {
+		    		        			serr  = res.message;
+		    		        		}
+		    		        		console.log ('_syncup : adding error ' + obj + '-' + data[d]._soupEntryId + ' : ' + serr);
+		    		        		_addSyncError (obj, data[d]._soupEntryId, serr)
+		    		        	}
+			    			}));
+	            			
+			    		}
+			    		
+			    		$q.all(allPromises).then(function () { 
+			    			console.log ('syncup: finished syncing : ' + obj);
+			    			deferredDone.resolve(); 
+			    		});
+		    		} else {
+		    			deferredDone.resolve(); 
+		    		}
+		    		
+		    	});
+			return deferredDone.promise;
+		}
 
         // The  singleton service injected into components dependent on the service
         return {
@@ -351,39 +592,6 @@ angular.module('sfdata.service', ['sfdata.constants'])
 	    	resolveCordova: resolveCordova,
 	    	setOnline: function(val) { 
 	    		_online = val; 
-	    		// sync any new/updated customers/orders
-	    		if (val) {
-	    			var soupToId = {};
-	    			
-	    			var obj = "Contact",
-	    				allFields = soups[obj].allFields;
-	    			
-	    			soupToId[obj] = {};
-	    			
-	    			_queryMode(obj, allFields,  [{field: 'Id', equals: 'LOCAL'}], false )
-			    		.then(function (data) {
-			    			$rootScope.tosync = data.length;
-			    			$rootScope.syncerrors = [];
-				    		console.log ('sync Contact : ' + angular.toJson(data));
-				    		for (var d in data) {
-
-	                			console.log ('upserting into ' + obj + ' : ' + angular.toJson(data[d]));
-				    			_insert(obj, data[d]).then (function (res) {
-			    					if (res.Id && res.Id !== 'LOCAL') {
-			    						console.log ('Save soupToId, incase any child records have been created that references this parent: ' + soupToId[obj][data[d]._soupEntryId] + ' > ' + res.Id);
-			    						soupToId[obj][data[d]._soupEntryId] = res.Id;
-			    						$rootScope.tosync +=  -1;
-			    		        	} else { // array
-			    		        		var serr = 'Sync Error for ['+res._soupEntryId+']';
-			    		        		if (res.message) {
-			    		        			serr  += ': ' + res.message;
-			    		        		}
-			    		        		$rootScope.syncerrors.push (serr)
-			    		        	}
-				    			})
-				    		}
-				    	})
-	    		}
 	    	},
 	    	getOnline: function() { 
 	    		return _online; 
@@ -391,8 +599,15 @@ angular.module('sfdata.service', ['sfdata.constants'])
 	        getCreds: function() { 
 	        	return _creds; 
 	        },
-	        query: _query,
-	        insert: _insert
+	        query: query,
+	        queryLocal: queryLocal,
+	        insert: _insert,
+	        syncup: _syncup,
+	        initSyncinfo: _initSyncinfo,
+	        addSyncError: _addSyncError,
+	        rmSyncError: _rmSyncError,
+	        reinitialiseSoup: reinitialiseSoup
+	        
 	    }
     }])
     //Use this method to register work which needs to be performed on module loading
