@@ -1,13 +1,23 @@
 
 var custCntl = function ($scope, $rootScope, $location, $http, $routeParams, SFDCData) {
 
+	$scope.baskets = [];
+	$scope.results =  [];
+	$scope.offercreate = false;
+	$scope.shownewform = false;
+	
+	$rootScope.$watch('online', function(val) {
+		console.log ('custCntl online change ' + val);
+    	$scope.custonline = $rootScope.online;
+    });
+	
 	$scope.search = function (stxt) {
     	SFDCData.query("Contact", "*",  stxt && [{field: 'LastName', like: stxt}] || null)
     		.then(function (data) {
 	    		console.log ('controller : ' + angular.toJson(data));
 	    		$scope.results =  data;
 	    	})
-    	if (stxt && stxt.length > 5) {
+    	if (stxt && stxt.length > 2) {
     		$scope.offercreate = true;
     	}
     }
@@ -32,6 +42,7 @@ var custCntl = function ($scope, $rootScope, $location, $http, $routeParams, SFD
 		$scope.sync = true;
 		getLocal();
 	}
+	
 	
 	$scope.edit = function (o1) {
 		$scope.NewCustomer = o1;
@@ -63,10 +74,15 @@ var custCntl = function ($scope, $rootScope, $location, $http, $routeParams, SFD
     	$scope.waiting = true;
     	
     	SFDCData.initSyncinfo();
+    	$scope.syncstatus = "save Contacts";
     	SFDCData.syncup ("Contact").then(function () {
+    		$scope.syncstatus = "save Orders";
     		SFDCData.syncup ("Order__c").then(function () {
+    			$scope.syncstatus = "refresh Contacts";
     			SFDCData.query ("Contact",  "*", null).then(function () {
+    				$scope.syncstatus = "refresh Products";
 	    			SFDCData.query ("Product__c", "*", null).then(function () {
+	    				$scope.syncstatus = "upto date";
 	    				$scope.waiting = false;
 	    				getLocal();
 	    			});

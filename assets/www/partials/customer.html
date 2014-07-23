@@ -3,8 +3,9 @@
 #gps-wait-spinner {
   display: block;
   z-index: 10002;
-  margin-top: 8px; 
-  margin-left: 47%
+//  margin-top: 8px; 
+  width: 20px;
+  height: 20px;
 }
 
 #gps-wait-spinner .spinner-icon {
@@ -65,15 +66,18 @@
     
     <div class="row" ng-show="sync">
         <div class="large-12 columns">
-            <button ng-show="online" class="button expand" ng-click="syncout()" ng-disabled="waiting">
-            	<div ng-show="!waiting" style="line-height: 28px;" >Sync All</div>
-            	<div ng-if="waiting"  id="gps-wait-spinner"><div class="spinner-icon"></div></div>
+            <button ng-show="custonline" class="button expand" ng-click="syncout()" ng-disabled="waiting">
+            	<div style=" white-space: nowrap;">
+		            	<div ng-show="!waiting" style="display: inline-block; line-height: 28px;" >Sync All</div>
+			            <div ng-if="waiting"  style="display: inline-block;" id="gps-wait-spinner"><div class="spinner-icon"></div></div>
+			            <div ng-show="syncstatus" style="display: inline-block; line-height: 28px; margin-left: 10px;">[{{syncstatus}}]</div>
+            	</div>
             </button>
             
            
             
-            <div ng-show="!online" class="panel">Cannot Sync, You are not Online</div>
-            <div ng-show="results.length == 0" class="panel">Everything is Saved to Server</div>
+            <div ng-show="!custonline" class="panel">Cannot Sync, You are not Online</div>
+            <div ng-show="results.length == 0 && baskets.length == 0" class="panel">Everything is Saved to Server</div>
         </div>
     </div>
 
@@ -82,8 +86,8 @@
         <div class="large-2 small-2 columns">
           <!--  <img ng-src="https://eu2.salesforce.com/sfc/servlet.shepherd/version/download/{{o1.ThumbImageId__c}}"> -->
             <button ng-hide="sync " class="tiny button" ng-click="selectCustomer(o1)">Select</button>
-            <button ng-show="sync && online" class="tiny button" ng-click="edit(o1)">Edit</button>
-            <p ng-show="sync && !online">Go online to sync</p>
+            <button ng-show="sync && custonline" class="tiny button" ng-click="edit(o1)">Edit</button>
+            <p ng-show="sync && !custonline">Go online to sync</p>
         </div>
         <div class="large-10 small-10 columns">
             <p style="font-size: 80%; margin-bottom: 5px;">

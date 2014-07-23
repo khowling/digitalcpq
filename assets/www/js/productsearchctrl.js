@@ -1,4 +1,4 @@
-var searchCtrl =  function ($resource, $scope, $rootScope, $location, SFDCData) {
+var searchCtrl =  function ($resource, $scope, $rootScope, $location, $timeout, SFDCData) {
 
 
     angular.element(document).ready(function () {
@@ -110,7 +110,7 @@ var searchCtrl =  function ($resource, $scope, $rootScope, $location, SFDCData) 
 		}
 		console.log ('search() filters : ' + angular.toJson(filters));
 		// run search
-    	SFDCData.query("Product__c", ["Id", "Name", "ThumbImage69Id__c", "Type__c", "Make__c", "Available_Tariffs__c", "Operating_system__c", "Colour__c"],  filters)
+    	SFDCData.query("Product__c", ["Id", "Name", "Type__c", "Make__c", "Available_Tariffs__c", "Operating_system__c", "Colour__c", "ThumbImageB64__c"],  filters)
     	  .then(function (data) {
     		console.log ('controller : ' + angular.toJson(data));
     		
@@ -232,5 +232,7 @@ var searchCtrl =  function ($resource, $scope, $rootScope, $location, SFDCData) 
 	var initials = {txt: '', rows: 0};
 
 	console.log('initials ' + JSON.stringify(initials));
-	$scope.search (initials);
+	$timeout(function () {
+		$scope.search (initials);
+	});
 }

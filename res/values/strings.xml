@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="account_type">com.khowling.digitalcpq.login</string>
-    <string name="app_name">digitalcpq</string>
+    <string name="app_name">Offer Management</string>
     <string name="app_package">com.khowling.digitalcpq</string>
 </resources>

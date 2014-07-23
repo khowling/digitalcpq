@@ -1,7 +1,4 @@
-// used to inject a constant value
-//     	{"path":"Description__c","type":"string"}, {"path":"ThumbImage69Id__c","type":"string"}, {"path":"Type__c","type":"string"}, {"path":"Make__c","type":"string"}, {"path":"Available_Tariffs__c","type":"string"}, {"path":"Operating_system__c","type":"string"}, {"path":"Colour__c","type":"string"} 
-
-    	
+// used to inject a constant value 	
 angular.module('sfdata.constants', []).constant ('soups', {
     "Contact": { 
     	primaryField: 'LastName',
@@ -9,9 +6,8 @@ angular.module('sfdata.constants', []).constant ('soups', {
     	indexSpec:[{"path":"Id","type":"string"},{"path":"LastName","type":"string"},{"path":"Company__c","type":"string"}]},
 	"Product__c": {
 		primaryField: 'Name',
-    	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"},
-    	           {"path":"ThumbImage69Id__c","type":"string"}, {"path":"Type__c","type":"string"}, {"path":"Make__c","type":"string"}, {"path":"Available_Tariffs__c","type":"string"}, {"path":"Operating_system__c","type":"string"}, {"path":"Colour__c","type":"string"} ],
-    	allFields: ["Id", "Name", "Description__c", "ThumbImage69Id__c", "Type__c", "Make__c", "Available_Tariffs__c", "Operating_system__c", "Colour__c", "ConfigMetaData__c"]},
+    	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"}, {"path":"Type__c","type":"string"}, {"path":"Make__c","type":"string"}, {"path":"Available_Tariffs__c","type":"string"}, {"path":"Operating_system__c","type":"string"}, {"path":"Colour__c","type":"string"}, {"path":"ThumbImageB64__c","type":"string"} ],
+    	allFields: ["Id", "Name", "Description__c", "Type__c", "Make__c", "Available_Tariffs__c", "Operating_system__c", "Colour__c", "ConfigMetaData__c", "ThumbImageB64__c"]},
     	           
     "Order__c": {
     	primaryField: 'Name',
@@ -132,7 +128,17 @@ angular.module('sfdata.service', ['sfdata.constants'])
         var _creds;
         var _sfdcoauth;
         var _smartstore = SFDCMockStore;
-        var _online = true;
+        var _bootstrap;
+        var _online;
+        
+        var _setOnline = function(val, applyit) { 
+    		_online = val; 
+        	$rootScope.online = _online;
+        	if (applyit) {
+        		$rootScope.$apply();
+        	}
+        }
+        _setOnline (true, false);
         
         // HACK HERE 
         var _xref = {};
@@ -230,12 +236,21 @@ angular.module('sfdata.service', ['sfdata.constants'])
         	
             _sfdcoauth = cordova.require("salesforce/plugin/oauth");
             _smartstore = cordova.require("salesforce/plugin/smartstore");
-            _smartstore.setLogLevel();
+            _bootstrap = cordova.require("salesforce/util/bootstrap");
+            //_smartstore.setLogLevel();
+            
+            
+            _setOnline (_bootstrap.deviceIsOnline());
+            document.addEventListener("online", function() {
+            	_setOnline (true, true);  }, false);
+            document.addEventListener("offline", function() {
+            	_setOnline ( false, true);  }, false);
  
             setupOauthCreds(_sfdcoauth).then (function () {
             	console.log ('calling registerSoups');
             	registerSoups (_smartstore).then ( function () {
             		console.log  ('done, resolve cordova init');
+            		navigator.splashscreen.hide();
             		resolveCordova (cordova);
             	})
             });
@@ -590,9 +605,7 @@ angular.module('sfdata.service', ['sfdata.constants'])
         	isInitialised: function() { return _resolved; },
 	    	cordovaDeffer: cordovaDeffer,
 	    	resolveCordova: resolveCordova,
-	    	setOnline: function(val) { 
-	    		_online = val; 
-	    	},
+	    	setOnline: _setOnline, 
 	    	getOnline: function() { 
 	    		return _online; 
 	    	},

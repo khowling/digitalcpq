@@ -14,17 +14,19 @@ var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, 
     	.then(function (data) {
 
             $scope.product = data[0];
-            console.log ('config meta : ' + $scope.product.ConfigMetaData__c);
+            //console.log ('config meta : ' + $scope.product.ConfigMetaData__c);
             $scope.productConfigMetaData = angular.fromJson($scope.product.ConfigMetaData__c);
             $scope.getRichDescroption =  function() {
                 return $sce.trustAsHtml($scope.product.Description__c);
             };
+            /*
             $http.get('/proxy/chatter/files/' + $scope.product.ThumbImage69Id__c)
                 .success(function (cdata) {
                         $scope.productConfigPrice = 0;
                         $scope.product.imgsrc = 'https://eu2.salesforce.com' + cdata.downloadUrl;
 
             });
+            */
 
         });
 

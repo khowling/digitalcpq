@@ -6,7 +6,7 @@ div.switch1 input {
 }
 div.switch1 label {
 	display: block;
-	margin-bottom: 1rem;
+//	margin-bottom: 1rem;
 	position: relative;
 	color: transparent;
 	background: #ddd;
@@ -60,7 +60,7 @@ input.ng-invalid.ng-dirty, input.ng-invalid, textarea.ng-invalid.ng-dirty, texta
 }
 
 
-/* FIX for the Foundation5 off-canvas scroll issue */
+/* FIX for the Foundation5 off-canvas scroll issue 
 .off-canvas-fixed {
     -webkit-transition: -webkit-transform 500ms ease;
     transition: transform 500ms ease;
@@ -76,9 +76,7 @@ input.ng-invalid.ng-dirty, input.ng-invalid, textarea.ng-invalid.ng-dirty, texta
     -webkit-transform: none;
     transform: none;
     margin-left: -15.625rem;
-    /* vh UNITS NICER THAN JS LISTENER */
-    /* height: 100vh; */
-    /* (BUT LESS SUPPORTED) */
+
 }
 
 .move-left > .off-canvas-fixed {
@@ -93,6 +91,7 @@ input.ng-invalid.ng-dirty, input.ng-invalid, textarea.ng-invalid.ng-dirty, texta
     margin-right: -15.625rem;
     height: 100vh;
 }
+*/
 
 /* Container for the ng-view animation */
 .ngViewContainer {
