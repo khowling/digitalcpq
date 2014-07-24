@@ -110,45 +110,59 @@
         </nav>
 				-->
 		<div class="fixed">
-				<nav class="tab-bar" style="background: white; border-bottom: 1px solid #dbdbdb;" data-topbar="1">
+				<nav class="tab-bar" style="background: white; " data-topbar="1"> <!--  border-bottom: 1px solid #dbdbdb; -->
 
                 <section class="left-small" style="border-right: 0px;">
 
-                    <a class="show-for-small" ng-href="#/"><i class="fi-list" style="font-size: 25px; margin: 10px;"></i></a>
-                    <div class="hide-for-small" >
-											   <a href="#"  style="margin-left: 5px;">
-											      <img src="http://www.mindatrest.co.uk/images/cirrusglobe.png" style="height: 30px;"/>
+                    <a class="show-for-small" ng-href="#/">
+                    	<img src="img/sse-images/vodafone.png" style="margin-left: 5px;"/>
+                   	</a>
+                     
+                    <div class="hide-for-small" style="height:100%; width:100%; background: white!important;" >
+                    <!-- 
+                    	<a href="#"  style="margin-left: 5px;">
+											      <img src="img/sse-images/vodafone.png1" style="height: 30px;"/>
 											  
 											   </a>
+											   -->
 											</div>
+											
+											
                 </section>
 
-                <section class="middle tab-bar-section" style="right: 15rem;">
+                <section class="middle tab-bar-section" style="padding-left: 0px; right: 15rem;">
 
 										<div style="white-space: nowrap; height: 45px;">
 										
 											<div style="display: inline-block!important; vertical-align: top;" >
-											   <a href="#" class="hide-for-small" style="margin-right: 20px;">
-											    	<strong>Digital</strong>
+											   <a href="#/" class="hide-for-small" style="margin-right: 20px;">
+											    	<img class="logoHead" src="img/sse-images/vod-logo.png"/>
 											   </a>
 											</div>
 	
+												<div style="display: inline-block!important; vertical-align: top; line-height: 1.8;">
+													<h4 class="hide-for-small" style="font-size: 22px;" ng-bind="mode"></h4>
+												</div>
+												
 												<div style="display: inline-block!important; margin-top: 5px;" class="switch1 round">
 												  <input id="exampleCheckboxSwitch" type="checkbox" ng-model="homeonline">
 												  <label for="exampleCheckboxSwitch"></label>
 												</div>
 												
-												<h5 class="subheading" style="display: inline-block;  vertical-align: top; color: black;" ng-bind="mode"></h5>
+												
 												
 												<div style="display: inline-block; vertical-align: top;" >
-													<a  style="margin-top: 4px; margin-bottom: 0px; vertical-align: top;" class="show-for-medium-down button tiny radius" ng-class="{'disabled': !homeonline, 'success': homeonline && syncinfo.tosync > 0 && syncinfo.errcount == 0, 'alert': homeonline && syncinfo.errcount >0 }" ng-href="#/customer?sync"> <strong>Sync <span ng-show="syncinfo.tosync > 0" >[{{syncinfo.tosync}}]</span></strong></strong></a>
+													<a  style="margin-top: 4px; margin-bottom: 0px; vertical-align: top;" class=" button tiny radius" ng-class="{'disabled': !homeonline, 'success': homeonline && syncinfo.tosync > 0 && syncinfo.errcount == 0, 'alert': homeonline && syncinfo.errcount >0 }" ng-href="#/customer?sync"> <strong>Sync <span ng-show="syncinfo.tosync > 0" >[{{syncinfo.tosync}}]</span></strong></strong></a>
 												</div>
 										</div>
                 </section>
 
-                <section class="right tab-bar-section show-for-medium-down" style="left: auto; border-left: 0px;">
-                    <a ng-href="#basket" class=" button radius" style="padding: 5px 20px; margin-bottom: 0px;">
-                        {{selectedCustomer.FirstName}} {{selectedCustomer.LastName}}<i class="fi-shopping-cart" style="font-size: 18px;margin-left: 5px; margin-right: 5px;"></i><i class="fi-pound" style="font-size: 10px; margin: 2px;"></i><span ng-bind="selectedBasket.total"/> (<span ng-bind="selectedBasket.items">)</span>
+                <section class="right tab-bar-section show-for-medium-down cartWrap" style="left: auto; border-left: 0px;">
+                    <a ng-href="#basket" class=" button radius headBtn" style="padding: 5px 20px; margin-bottom: 0px; color: black;">
+                        {{selectedCustomer.FirstName}} {{selectedCustomer.LastName}}
+                        <i class="fi-shopping-cart" style="font-size: 18px;margin-left: 5px; margin-right: 5px;"></i>
+                        <i class="fi-pound" style="font-size: 10px; margin: 2px;"></i>
+                        <span class="mun" ng-bind="selectedBasket.total"/> (<span ng-bind="selectedBasket.items">)</span>
                     </a>
                 </section>
 
@@ -184,10 +198,10 @@
         </div>        
         
 				<!------------------------------- Main Page ---------------------------->
-        <div class="row collapse">
+        <div class="row ">
 						
             <!-- LEFT THIRD -->
-            <div class="hide-for-medium-down large-3  column">
+            <div class="hide-for-medium-down large-3  column" >
 
                 <div class="slide-animate" ng-if="!sidecart" ng-include="'partials/basket.html'"></div>
 
@@ -196,8 +210,9 @@
                     <hr/>
                     <h4 ng-bind="sf.context.user.fullName"></h4>
                 </div>
-                
+                <!-- 
                 <a class="button expand" ng-class="{'disabled': !homeonline, 'success': homeonline && syncinfo.tosync > 0 && syncinfo.errcount == 0, 'alert': homeonline && syncinfo.errcount >0 }" ng-href="#/customer?sync"> Sync <span ng-show="syncinfo.tosync > 0" >[{{syncinfo.tosync}}]</span></a>
+            		-->
             </div>
 
             <!-- RIGHT TWO THIRDS -->

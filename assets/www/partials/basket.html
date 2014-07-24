@@ -1,68 +1,83 @@
-<div class="panel">
+
 	<div class="row">
-		<div class="large-8 columns">
-		<h5>Basket</h5>
+		<div class="large-12 medium-10 medium-centered columns">
+		
+			<div class="">
+			
+	        <a ng-show="!selectedCustomer" class="button expand vodPurple" href="#/customer" style="padding-top: 5px; padding-bottom: 5px; padding-right: 10px;padding-left: 10px;">
+	        	<div style="float: left; margin: 8px;">Find Customer</div>
+	        	<i class="fi-male" style="font-size: 25px; margin: 2px; float: right;"></i>
+	        </a>
+	    
+	                
+	     	<div id="offerWrap" class="" ng-show="selectedCustomer">
+	     		<h5 class="subheader homeHead" style="text-align: center;">Customer</h5>
+	     				
+								 <!-- <h5 class="mun">Customer</h5>   -->
+							
+							
+		       <i class="fi-male  mun" style="font-size: 25px; margin-left: 5px; float: left;"></i>
+					 <p style="float: left; margin: 5px; margin-left: 15px;">{{selectedCustomer.FirstName}} {{selectedCustomer.LastName}}</p>
+	
+				   <hr style="margin: 8px; border: none;"/>
+				   <i class="fi-home  mun" style="font-size: 25px; margin: 2px; float: left;"></i>
+				   <p style="float: left; margin: 5px; margin-left: 15px;">{{selectedCustomer.Company__c}}</p>
+				   <div style="clear: both;"></div>
+				   <!-- 
+				   <hr />
+				   <label >Id</label>
+				   <p>{{selectedCustomer.Id}} {{selectedCustomer._soupEntryId}}</p>
+		   			-->
+	         
+	     </div>
+	  </div>  
+	     
+		<div id="offerWrap" style="border-bottom-left-radius: 0px; border-bottom-right-radius: 0px;margin-bottom: 0px;">
+		
+			<div class="klarge-12  kcolumns">
+			
+			<h5 class="subheader homeHead" style="text-align: center;">Basket</h5>
+			
+			<ul class="side-nav" style="padding: 0px;">
+				<li  ng-repeat="sel in selectedBasket.product" style="line-height:1; padding:0; margin-top: 5px;">
+					<div class="row collapse">
+					  <div class="small-9 columns">
+					 		<div ng-bind="sel.product.Name"/>
+		                    <div ng-repeat="(n, v) in sel.config" ng-bind="v" class="label success round" style="margin: 2px;"/>
+					 	</div>
+					 	<div class="small-2 columns">
+		                    <i class="fi-pound" style="font-size: 18px; margin: 2px;"></i><span ng-bind="sel.price"/>
+					    </div>
+				  </div>
+				</li>
+			</ul>
+
+					<a class="button tiny expand pOrder vodPurple" ng-href="#/search">add products</a>
+				</div>
+		</div>	
+		
+		
+		<div class="" style="margin-bottom: 15px;">	
+			<div class="totalWrap">
+				<span class="l">Total</span>
+				<span class="r" ng-bind="selectedBasket.total"/>
+			</div>
+
 		</div>
-		<div class="large-4 right columns">
-			<i class="fi-shopping-cart" style="font-size: 44px;"></i>
+		
+		<div class="" >
+			<button ng-show="selectedBasket.items > 0 && selectedCustomer" ng-click="insertSFDC();" class="button expand vodPurple"  style="padding-top: 10px; padding-bottom: 10px; padding-right: 10px;padding-left: 10px;">
+	        	<div style="float: left; margin: 8px;">Place Order</div>
+	        	<i class="fi-shopping-cart" style="font-size: 25px; margin: 2px; float: right; color: white!important;"></i>
+	        </button>
+	        
+	        <button class="tiny" ng-show="selectedBasket.items > 0 || selectedCustomer" ng-click="resetBasket();">Reset Cart</button>
+	        
 		</div>
+
 	</div>
-	
-	<div class="row">
-		<div class="panel" ng-show="!selectedCustomer">
-        <a class="button expand " href="#/customer">Select Customer</a>
-    </div>
-                
-     <div class="panel" ng-show="selectedCustomer">
-       <i class="fi-male" style="font-size: 25px; margin: 2px; float: right;"></i>
-       <label >Name</label>
-		   <p>{{selectedCustomer.FirstName}} {{selectedCustomer.LastName}}</p>
-		   <hr />
-		   <i class="fi-home" style="font-size: 25px; margin: 2px; float: right;"></i>
-		   <label >Company</label>
-		   <p>{{selectedCustomer.Company__c}}</p>
-		   <hr />
-		   <label >Id</label>
-		   <p>{{selectedCustomer.Id}} {{selectedCustomer._soupEntryId}}</p>
-   
-         
-     </div>
-                
-	
-	
-	<ul class="side-nav">
-		<li  ng-repeat="sel in selectedBasket.product" style="line-height:1; padding:0; margin-top: 5px;">
-			<div class="row collapse">
-			  <div class="small-9 columns">
-			 		<a ng-click="rmSelected($index);" style="padding: 0px;"><div ng-bind="sel.product.Name"/></a>
-                    <div ng-repeat="(n, v) in sel.config" ng-bind="v" class="label success round" style="margin: 2px;"/>
-			 	</div>
-			 	<div class="small-2 columns">
-                    <i class="fi-pound" style="font-size: 18px; margin: 2px;"></i><span ng-bind="sel.price"/>
-			    </div>
-		  </div>
-		</li>
-
-        <li  style="line-height:1; padding:0; margin-top: 5px;">
-            <div class="row collapse">
-                <div class="small-9 columns">
-                    Total
-                </div>
-                <div class="small-2 columns">
-                    <i class="fi-pound" style="font-size: 18px; margin: 2px;"></i><span ng-bind="selectedBasket.total"/>
-                </div>
-            </div>
-        </li>
-        <li  style="line-height:1; padding:0; margin-top: 5px;">
-        	<a class="button expand " ng-href="#/search">Add product</a>
-        </li>
-
-	</ul>
-	<div class="small-12 columns" ng-show="saveErrorStr">
-   		<div class="alert-box alert"  ng-bind="saveErrorStr"/>
-   </div> 
-	<ul class="button-group">
-		<li><button ng-show="selectedBasket.items > 0 && selectedCustomer" ng-click="insertSFDC();" >Place Order</button></li>
-		<li><button ng-show="selectedBasket.items > 0 || selectedCustomer" ng-click="resetBasket();">Reset</button></li>
-	</ul>
 </div>
+                
+	
+	
+
