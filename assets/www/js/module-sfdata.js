@@ -242,8 +242,10 @@ angular.module('sfdata.service', ['sfdata.constants'])
             
             _setOnline (_bootstrap.deviceIsOnline());
             document.addEventListener("online", function() {
+            	console.log ("online addEventListener");
             	_setOnline (true, true);  }, false);
             document.addEventListener("offline", function() {
+            	console.log ("offline addEventListener");
             	_setOnline ( false, true);  }, false);
  
             setupOauthCreds(_sfdcoauth).then (function () {

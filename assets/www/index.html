@@ -244,7 +244,7 @@
         static_resource_url: './static_resources',
         sfdc_api_version: '/services/data/v30.0',
         clientId: '3MVG99qusVZJwhskfsiYZz9vAn3iWjp4V79_irNpsQl9yNiuTCogBf9YkZH_OK9JmP_hdODiXWhX6RqC.RaH4',
-        session_api: '00Db0000000diWP!ARIAQJY_oVSbUjhrLNiCvgx.hf7D1x.QO6Iodip_6lmwmruddnsn3KL9PeDyu3az_0BYOj3yuLsE9UPCX0PYT9mMuUOnACEd',
+        session_api: '00Db0000000diWP!ARIAQCK2lv4_8p7GinHOGDC0Swvd1vPJhMUMsBkw6hPlJZ6SOpR49jc.xggwf0wFBhnTz8TVqf8m6u7AC6eZ4Gs16t1uHScc',
         refresh_api: ''
     	};
 
@@ -310,16 +310,16 @@
     		$rootScope.selectedBasket = {total: 0.00, items: 0, product: [], payload: []};
 	    	return true;
     	}
-	    $rootScope.resetBasket();
-	    
-	    $rootScope.addBasket = function (product, productConfigPrice, productConfig) {
+    	$rootScope.addBasket = function (product, productConfigPrice, productConfig) {
 	    	$rootScope.selectedBasket.total += productConfigPrice;
 	    	$rootScope.selectedBasket.items ++;
 	    	$rootScope.selectedBasket.product.push({product:  product, config: productConfig, price: productConfigPrice})
 	    	$rootScope.selectedBasket.payload.push({product:  product.Id, config: productConfig, price: productConfigPrice});
 	    }
+	    $rootScope.resetBasket();
 	    
 	    $rootScope.insertSFDC = function() {
+	    	console.log ('insertSFDC ');
 	    	  $rootScope.saveErrorStr = null;
 	        SFDCData.insert("Order__c", {"Contact__c": {"_soupEntryId": $rootScope.selectedCustomer._soupEntryId, "Id": $rootScope.selectedCustomer.Id } ,"OrderMetaData__c": angular.toJson($rootScope.selectedBasket.payload)})
 	        	.then(function (res) {
@@ -331,14 +331,14 @@
 		        		jQuery('#orderconf_modal').foundation('reveal', 'open');
 		        		$rootScope.resetBasket();
 		        	} else  { // array
-		        		$scope.saveErrorStr = 'Didnt Save';
+		        		$rootScope.saveErrorStr = 'Didnt Save';
 		        		if (res.message) {
-		        			$scope.saveErrorStr  += ': ' + res.message;
+		        			$rootScope.saveErrorStr  += ': ' + res.message;
 		        		}
 		        	}
 	         });
-	    	
 	    }
+	    
     		
     	$rootScope.$on("$routeChangeSuccess", function(currentRoute, previousRoute){
     		    $rootScope.sidecart = true;
@@ -354,6 +354,7 @@
 	    
 	   
     }]);
+
     
     var homeCtrl = function ($rootScope, $scope, SFDCData) {
 		    var cordova_change = false,

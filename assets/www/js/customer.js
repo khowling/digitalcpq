@@ -31,7 +31,8 @@ var custCntl = function ($scope, $rootScope, $location, $http, $routeParams, SFD
 			SFDCData.queryLocal("Order__c", "*",  [{field: 'Id', equals: 'LOCAL'}])
 			.then (function (data) {
 				for (bidx in data) {
-					data[bidx].OrderMetaData__c = angular.toJson(data[bidx].OrderMetaData__c);
+					console.log ('got basket data : ' + data[bidx].OrderMetaData__c);
+					data[bidx].OrderMetaData__c = angular.fromJson(data[bidx].OrderMetaData__c);
 				}
 				$scope.baskets =  data;
 			});

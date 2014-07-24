@@ -84,16 +84,16 @@
     <!-- results -->
     <div class="row" ng-repeat="o1 in results">
         <div class="large-2 small-2 columns">
-          <!--  <img ng-src="https://eu2.salesforce.com/sfc/servlet.shepherd/version/download/{{o1.ThumbImageId__c}}"> -->
+            <i ng-show="sync" class="fi-male" style="margin-left: 10px; font-size: 28px;"></i>
             <button ng-hide="sync " class="tiny button" ng-click="selectCustomer(o1)">Select</button>
             <button ng-show="sync && custonline" class="tiny button" ng-click="edit(o1)">Edit</button>
-            <p ng-show="sync && !custonline">Go online to sync</p>
+
         </div>
         <div class="large-10 small-10 columns">
             <p style="font-size: 80%; margin-bottom: 5px;">
                 {{o1.FirstName}} {{o1.LastName}} ({{o1.Company__c}}) {{o1.MailingPostalCode}} <div class="label success" ng-show="o1.Id == 'LOCAL'">LOCAL</div>
             </p>
-            <p style="font-size: 70%; margin-bottom: 5px;">debug Id: {{o1.Id}} _soupEntryId {{o1._soupEntryId}}</p>
+            <!--  <p style="font-size: 70%; margin-bottom: 5px;">debug Id: {{o1.Id}} _soupEntryId {{o1._soupEntryId}}</p>  -->
             <div ng-show="syncinfo.errmsg['Contact-'+o1._soupEntryId]"  class="alert-box alert" ng-bind="syncinfo.errmsg['Contact-'+o1._soupEntryId]" />
 
 
@@ -160,9 +160,10 @@
         </div>
         <div class="large-10 small-10 columns">
             <p style="font-size: 80%; margin-bottom: 5px;">
-               {{b.Contact__c}} {{b.OrderMetaData__c.product}} <div ng-repeat="odata in b.OrderMetaData__c">{{odata.config}} {{odata.price}}</div>  <div class="label success" ng-show="b.Id == 'LOCAL'">LOCAL</div>
+           
+               <div ng-repeat="odata in b.OrderMetaData__c">{{odata.config}} {{odata.price}}</div>  <div class="label success" ng-show="b.Id == 'LOCAL'">LOCAL</div>
             </p>
-            <p style="font-size: 70%; margin-bottom: 5px;">debug Id: {{b.Id}} _soupEntryId {{b._soupEntryId}}</p>
+            <!--  <p style="font-size: 70%; margin-bottom: 5px;">debug Id: {{b.Id}} _soupEntryId {{b._soupEntryId}}</p>  -->
             <div ng-show="syncinfo.errmsg['Order__c-'+b._soupEntryId]"  class="alert-box alert" ng-bind="syncinfo.errmsg['Order__c-'+b._soupEntryId]" />
 
         </div>
