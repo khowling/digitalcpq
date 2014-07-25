@@ -1,11 +1,3 @@
-<style>
-.filterSelected {
-    background: #00aff0!important;
-}
-.filterNotSelected {
-    background: #5a5a5a!important;
-}
-</style>
 
 
 <div class="row show-for-small-down collapse" style="padding-bottom: 0px; padding-top: 0px; margin-bottom: 10px;">
@@ -48,24 +40,30 @@
             <strong>Search Results</strong> (<span ng-bind="data.totalrecords"/>)</p>
         </h6>
 -->
-        <div class="panel" style="padding: 5px; background: white;">
+				<h5 class="subheader homeHead" style="font-size: 90%; text-align: center;" >Search Results</h5>
+	
+<!--        <div class="panel" style="padding: 5px; background: white;">
+        	<h5 class="subheader homeHead" style="font-size: 90%; text-align: center;" ng-bind="fieldnm | sfnametolabel"/>
         	<button class="expand radius button small filterNotSelected" ng-click="setfilters = {}; search(searchparam);" style="margin: 0; padding: 8px;"><i class="fi-x"></i><span style="margin-left: 5px;">Reset Filters</span>  </button>
-        </div>
+      </div> -->
 
         <!-- ***************** FACET RESULTS *************** -->
         <span ng-repeat="fieldnm in facetorder">
-            <div class="panel" style="padding: 5px; background: white;">
-                <p style="margin-bottom: 0; color: black;" ng-bind="fieldnm | sfnametolabel"/>
+          <!--   <div class="panel" style="padding: 5px; background: white;">  
+                <p style="margin-bottom: 0; color: black;" ng-bind="fieldnm | sfnametolabel"/> -->
+                <h5 class="subheader homeHead" style="font-size: 90%; text-align: center;" ng-bind="fieldnm | sfnametolabel"/>
                 <ul class="side-nav" style="line-height: 1; padding: 0;">
                     <li ng-repeat="(valnm, cnt) in data.facetresults[fieldnm]">
                         <button ng-click="toggleFilter(fieldnm, valnm);  search(searchparam);" class="expand radius button small" ng-class="{'filterNotSelected': !isFilterSelected(fieldnm, valnm), 'filterSelected' : isFilterSelected(fieldnm, valnm)}" style="margin-bottom: 0px; border: solid 1px #c6c6c6; padding: 8px;">
 
-                            <i ng-class="{'fi-filter' : !isFilterSelected(fieldnm, valnm),  'fi-x' : isFilterSelected(fieldnm, valnm)}"/>
-                            <span ng-bind="valnm  | sfnametolabel"/> (<span ng-bind="cnt"/>)
+                        <!--     <i ng-class="{'fi-filter' : !isFilterSelected(fieldnm, valnm),  'fi-x' : isFilterSelected(fieldnm, valnm)}"/> -->
+                            <strong>
+                            	<span ng-bind="valnm  | sfnametolabel"/> (<span ng-bind="cnt"/>)
+                            </strong>
                         </button>
                     </li>
                 </ul>
-            </div>
+          <!--  </div> -->
         </span>
 
     </div>

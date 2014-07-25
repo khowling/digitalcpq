@@ -113,21 +113,15 @@
 				<nav class="tab-bar" style="background: white; " data-topbar="1"> <!--  border-bottom: 1px solid #dbdbdb; -->
 
                 <section class="left-small" style="border-right: 0px;">
-
                     <a class="show-for-small" ng-href="#/">
-                    	<img src="img/sse-images/vodafone.png" style="margin-left: 5px;"/>
+                    	<img src="img/sse-images/vodafone.jpg" style="margin-left: 5px;"/>
                    	</a>
                      
-                    <div class="hide-for-small" style="height:100%; width:100%; background: white!important;" >
-                    <!-- 
-                    	<a href="#"  style="margin-left: 5px;">
-											      <img src="img/sse-images/vodafone.png1" style="height: 30px;"/>
-											  
+                    <div class="hide-for-small" style="height:100%; width:100%; background: white;" >
+											   <a class="" ng-href="#/">
+											   	<i class="fi-list ham" style="font-size: 25px; margin: 10px;"></i>
 											   </a>
-											   -->
-											</div>
-											
-											
+										</div>
                 </section>
 
                 <section class="middle tab-bar-section" style="padding-left: 0px; right: 15rem;">
@@ -148,21 +142,21 @@
 												  <input id="exampleCheckboxSwitch" type="checkbox" ng-model="homeonline">
 												  <label for="exampleCheckboxSwitch"></label>
 												</div>
-												
-												
-												
-												<div style="display: inline-block; vertical-align: top;" >
-													<a  style="margin-top: 4px; margin-bottom: 0px; vertical-align: top;" class=" button tiny radius" ng-class="{'disabled': !homeonline, 'success': homeonline && syncinfo.tosync > 0 && syncinfo.errcount == 0, 'alert': homeonline && syncinfo.errcount >0 }" ng-href="#/customer?sync"> <strong>Sync <span ng-show="syncinfo.tosync > 0" >[{{syncinfo.tosync}}]</span></strong></strong></a>
+
+												<div style="display: inline-block; vertical-align: top; margin-left: 10px;" >
+													<a  style="margin-top: 5px; margin-bottom: 0px; vertical-align: top; padding-bottom: 0.55rem;" class=" button tiny radius" ng-class="{'disabled': !homeonline, 'success': homeonline && syncinfo.tosync > 0 && syncinfo.errcount == 0, 'alert': homeonline && syncinfo.errcount >0 }" ng-href="#/customer?sync"> 
+														<strong>Sync <span ng-show="syncinfo.tosync > 0" >[<span ng-bind="syncinfo.tosync"/>]</span></strong>
+													</a>
 												</div>
 										</div>
                 </section>
 
                 <section class="right tab-bar-section show-for-medium-down cartWrap" style="left: auto; border-left: 0px;">
                     <a ng-href="#basket" class=" button radius headBtn" style="padding: 5px 20px; margin-bottom: 0px; color: black;">
-                        {{selectedCustomer.FirstName}} {{selectedCustomer.LastName}}
+                        <span ng-bind="selectedCustomer.FirstName + ' ' + selectedCustomer.LastName"></span>
                         <i class="fi-shopping-cart" style="font-size: 18px;margin-left: 5px; margin-right: 5px;"></i>
                         <i class="fi-pound" style="font-size: 10px; margin: 2px;"></i>
-                        <span class="mun" ng-bind="selectedBasket.total"/> (<span ng-bind="selectedBasket.items">)</span>
+                        <span class="" ng-bind="selectedBasket.total"/> (<span ng-bind="selectedBasket.items">)</span>
                     </a>
                 </section>
 
@@ -259,7 +253,7 @@
         static_resource_url: './static_resources',
         sfdc_api_version: '/services/data/v30.0',
         clientId: '3MVG99qusVZJwhskfsiYZz9vAn3iWjp4V79_irNpsQl9yNiuTCogBf9YkZH_OK9JmP_hdODiXWhX6RqC.RaH4',
-        session_api: '00Db0000000diWP!ARIAQCK2lv4_8p7GinHOGDC0Swvd1vPJhMUMsBkw6hPlJZ6SOpR49jc.xggwf0wFBhnTz8TVqf8m6u7AC6eZ4Gs16t1uHScc',
+        session_api: '00Db0000000diWP!ARIAQFP2_YHp8Zrua1YQLGALl9ci2juQ2URL3XR9r.4zuldjec1XJ2.V_to6C1p0sHmiVxmIxffdX4EadJxj5iAEFfqENm0m',
         refresh_api: ''
     	};
 

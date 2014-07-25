@@ -218,6 +218,7 @@ div.switch1 input:checked + label:after {
 
 body {
 //    background: #ebebeb;
+			background: #f8f8f8;
 }
 
 button, .button {
@@ -269,6 +270,15 @@ button, .button {
 
 a.tiny {
     background-color: #9c2aa0 !important;
+}
+
+.button.filterSelected {
+    background: #008cba !important;
+    text-align: left;
+}
+.button.filterNotSelected {
+    background: #c5c5c5 !important;
+    text-align: left;
 }
 
 /* Basket */
@@ -388,10 +398,20 @@ li.prev {
 /* Configure page */
 
 .notdoneit {
-    background: #e60000 !important;
+ //   background: #e60000 !important;
+ background: #5b5b5b !important;
     color: white!important;
     margin-bottom: 12px !important;
+    border-radius: 5px;
 }
+.doneit {
+	background: #e60000 !important;
+	color: white!important;
+	margin-bottom: 12px ;
+	border-radius: 5px;
+
+}
+
 .dropper {
     background: #fff !important;
 }
