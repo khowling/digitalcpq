@@ -26,8 +26,8 @@ var searchCtrl =  function ($resource, $scope, $rootScope, $location, $timeout, 
         }
     }
 
-	var urlfilters = JSON.stringify($location.search('filters'));
-	console.log ('url filters ' + urlfilters);
+	//var urlfilters = JSON.stringify($location.search('filters'));
+	//console.log ('url filters ' + urlfilters);
 	
 	
 	
@@ -36,7 +36,7 @@ var searchCtrl =  function ($resource, $scope, $rootScope, $location, $timeout, 
     $scope.filtersCount = function() {
         return  Object.keys($scope.setfilters).length;
     }
-	if (!urlfilters) $scope.setfilters = JSON.parse (urlfilters);
+	//if (!urlfilters) $scope.setfilters = JSON.parse (urlfilters);
 	
 	//$scope.data = data;
 	
