@@ -7,7 +7,7 @@ angular.module('sfdata.constants', []).constant ('soups', {
 	"Product__c": {
 		primaryField: 'Name',
     	indexSpec:[{"path":"Id","type":"string"},{"path":"Name","type":"string"}, {"path":"Type__c","type":"string"}, {"path":"Make__c","type":"string"}, {"path":"Available_Tariffs__c","type":"string"}, {"path":"Operating_system__c","type":"string"}, {"path":"Colour__c","type":"string"}, {"path":"ThumbImageB64__c","type":"string"} ],
-    	allFields: ["Id", "Name", "Description__c", "Type__c", "Make__c", "Available_Tariffs__c", "Operating_system__c", "Colour__c", "ConfigMetaData__c", "ThumbImageB64__c"]},
+    	allFields: ["Id", "Name", "Description__c", "Type__c", "Make__c", "Available_Tariffs__c", "Operating_system__c", "Colour__c", "ConfigMetaData__c", "ThumbImageB64__c", "Base_Price__c"]},
     	           
     "Order__c": {
     	primaryField: 'Name',

@@ -1,4 +1,4 @@
-
+'use strict';
 var custCntl = function ($scope, $rootScope, $location, $http, $routeParams, SFDCData) {
 
 	$scope.baskets = [];
@@ -59,9 +59,15 @@ var custCntl = function ($scope, $rootScope, $location, $http, $routeParams, SFD
 
     	} else {
     		$rootScope.selectedCustomer = cust;
-    		$location.path( "/");
+    		var fromURL = $routeParams.fromURL;
+    		if (!fromURL) {
+    			$location.path( "/");
+    		} else {
+    			$location.path(fromURL);
+    		}
     	}
     }
+    
     $scope.reinitialiseSoup = function (){
     	if (confirm("Are you sure!")) {
     		$scope.reinit_wait = true;

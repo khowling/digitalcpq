@@ -4,7 +4,7 @@
 		
 			<div class="">
 			
-	        <a ng-show="!selectedCustomer" class="button expand vodPurple" href="#/customer" style="padding-top: 5px; padding-bottom: 5px; padding-right: 10px;padding-left: 10px;">
+	        <a ng-show="!selectedCustomer" class="button expand vodPurple" ng-href="#/customer{{!sidecart && '?fromURL=/basket' || ''}}" style="padding-top: 5px; padding-bottom: 5px; padding-right: 10px;padding-left: 10px;">
 	        	<div style="float: left; margin: 8px;">Find Customer</div>
 	        	<i class="fi-male" style="font-size: 25px; margin: 2px; float: right;"></i>
 	        </a>
@@ -17,11 +17,11 @@
 							
 							
 		       <i class="fi-male  mun" style="font-size: 25px; margin-left: 5px; float: left;"></i>
-					 <p style="float: left; margin: 5px; margin-left: 15px;">{{selectedCustomer.FirstName}} {{selectedCustomer.LastName}}</p>
+					 <p style="float: left; max-width: 75%; margin: 5px; margin-left: 15px;">{{selectedCustomer.FirstName}} {{selectedCustomer.LastName}}</p>
 	
 				   <hr style="margin: 8px; border: none;"/>
 				   <i class="fi-home  mun" style="font-size: 25px; margin: 2px; float: left;"></i>
-				   <p style="float: left; margin: 5px; margin-left: 15px;">{{selectedCustomer.Company__c}}</p>
+				   <p style="float: left; max-width: 75%; margin: 5px; margin-left: 15px;">{{selectedCustomer.Company__c}}</p>
 				   <div style="clear: both;"></div>
 				   <!-- 
 				   <hr />

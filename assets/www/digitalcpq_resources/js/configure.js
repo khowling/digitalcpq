@@ -1,6 +1,4 @@
-/**
- * Created by keith on 19/06/2014.
- */
+'use strict';
 var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, $scope, $rootScope, $location) {
 
     angular.element(document).ready(function () {
@@ -10,12 +8,28 @@ var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, 
     //console.log ('hitting : ' +url);
     //$http.get('/proxy' + '/query/?q=' + "select id, name, RecordType.Name, ThumbImage69Id__c,  Description__c from product__c where id = '" + $routeParams.id + "'")
 
+    $scope.enableaddtocart = false;
+    $scope.productConfig = { };
+    
 	SFDCData.query("Product__c", "*",  [{field: "Id", equals: $routeParams.id}])
     	.then(function (data) {
 
             $scope.product = data[0];
             //console.log ('config meta : ' + $scope.product.ConfigMetaData__c);
+            $scope.productConfigPrice = $scope.product.Base_Price__c || 0;
             $scope.productConfigMetaData = angular.fromJson($scope.product.ConfigMetaData__c);
+            
+            // can we light up add to cart?
+            var notfinished = false;
+            for (var c in $scope.productConfigMetaData) {
+                var copt = $scope.productConfigMetaData[c];
+                if (copt.required && !$scope.productConfig[copt.name]) {
+                    notfinished = true;
+                }
+            }
+            if (!notfinished) $scope.enableaddtocart = true;
+            
+            
             $scope.getRichDescroption =  function() {
                 return $sce.trustAsHtml($scope.product.Description__c);
             };
@@ -49,19 +63,18 @@ var configureCtrl =  function (SFDCData, $sce, $http, $routeParams,  $resource, 
         }
     }
     
-    $scope.enableaddtocart = false;
-    $scope.productConfig = { };
+    
     $scope.addselection = function (category, val) {
         $scope.productConfig[category] = val;
         $scope.toggleAccordion(category);
         var notfinished = false;
-        $scope.productConfigPrice = 0;
+        $scope.productConfigPrice = $scope.product.Base_Price__c || 0;
         for (var c in $scope.productConfigMetaData) {
             var copt = $scope.productConfigMetaData[c];
             if (copt.required && !$scope.productConfig[copt.name]) {
                 notfinished = true;
             } else {
-                for (vopt in copt.values) {
+                for (var vopt in copt.values) {
                     if (copt.values[vopt].name === $scope.productConfig[copt.name]) {
                         $scope.productConfigPrice += copt.values[vopt].price;
                     }
