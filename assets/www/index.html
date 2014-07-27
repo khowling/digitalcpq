@@ -175,8 +175,8 @@
 												</div>
 
 												<div style="display: inline-block; vertical-align: top; margin-left: 10px;" ng-hide="inVisualforce">
-													<a  style="margin-top: 5px; margin-bottom: 0px; vertical-align: top; padding-bottom: 0.55rem;" class=" button tiny radius" ng-class="{'disabled': !homeonline, 'success': homeonline && syncinfo.tosync > 0 && syncinfo.errcount == 0, 'alert': homeonline && syncinfo.errcount >0 }" ng-href="#/customer?sync"> 
-														<strong>Sync <span ng-show="syncinfo.tosync > 0" >[<span ng-bind="syncinfo.tosync"/>]</span></strong>
+													<a  style="font-weight: bold; margin-top: 5px; margin-bottom: 0px; vertical-align: top; padding-bottom: 0.55rem;" class=" button tiny radius" ng-class="{'disabled': !homeonline, 'success': homeonline && syncinfo.tosync > 0 && syncinfo.errcount == 0, 'alert': homeonline && syncinfo.errcount >0 }" ng-href="#/customer?sync"> 
+														Sync<span ng-show="syncinfo.tosync > 0" ng-bind="'['+syncinfo.tosync+']'"/>
 													</a>
 												</div>
 										</div>

@@ -54,7 +54,7 @@
 
                 <div class="small-8 columns">
                     <input type="text" ng-model="searchtxt" ng-change="search(searchtxt)"
-                           placeholder="Search for..." />
+                           placeholder="i.e. Smith" />
                 </div>
                 <div class="small-4 columns">
                     <!--  <span class="postfix">.com</span> -->
@@ -131,11 +131,11 @@
                 </div>
                 <div  class="small-12 columns">
                     <label>Email</label>
-                    <input type="email" ng-model="NewCustomer.Email" placeholder="ie JSmith@gmail.com" ng-required="false"/>
+                    <input type="email" ng-model="NewCustomer.Email" placeholder="ie JSmith@gmail.com" ng-required="true"/>
                 </div>
                 <div  class="small-12 columns">
                     <label>Company Name</label>
-                    <input type="text" ng-model="NewCustomer.Company__c" placeholder="ie TelUK LTD" ng-required="true"/>
+                    <input type="text" ng-model="NewCustomer.Company__c" placeholder="ie TelUK LTD" ng-required="false"/>
                 </div>
                 <div  class="small-12 columns">
                     <label>Mailing PostCode</label>

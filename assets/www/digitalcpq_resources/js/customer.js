@@ -24,17 +24,18 @@ var custCntl = function ($scope, $rootScope, $location, $http, $routeParams, SFD
 	
 	var getLocal = function() {
 		SFDCData.queryLocal("Contact", "*",  [{field: 'Id', equals: 'LOCAL'}])
-		.then (function (data) {
-			console.log ('controller : ' + angular.toJson(data));
+		.then (function (cdata) {
+			//console.log ('custCntl getLocal : ' + angular.toJson(cdata));
 			// get any sync error
-			$scope.results =  data;
+			$scope.results =  cdata;
 			SFDCData.queryLocal("Order__c", "*",  [{field: 'Id', equals: 'LOCAL'}])
-			.then (function (data) {
-				for (bidx in data) {
-					console.log ('got basket data : ' + data[bidx].OrderMetaData__c);
-					data[bidx].OrderMetaData__c = angular.fromJson(data[bidx].OrderMetaData__c);
+			.then (function (odata) {
+				//console.log ('custCntl getLocal : ' + angular.toJson(odata));
+				for (var bidx in odata) {
+					//console.log ('got basket data : ' + odata[bidx].OrderMetaData__c);
+					odata[bidx].OrderMetaData__c = angular.fromJson(odata[bidx].OrderMetaData__c);
 				}
-				$scope.baskets =  data;
+				$scope.baskets =  odata;
 			});
 		});
 	}
@@ -100,7 +101,7 @@ var custCntl = function ($scope, $rootScope, $location, $http, $routeParams, SFD
 
     $scope.submit = function () {
         $scope.errorStr = null;
-        SFDCData.insert("Contact", $scope.NewCustomer).then(function (res) {
+        SFDCData.insert("Contact", $scope.NewCustomer, $scope.sync == true).then(function (res) {
         	console.log ('got ' + angular.toJson(res));
         	if (res.id) {
         		$scope.NewCustomer.Id = res.id;

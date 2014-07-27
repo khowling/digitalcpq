@@ -55,7 +55,7 @@ angular.module('sfdata.service', ['sfdata.constants'])
 					  console.log ('SFDCMockStore _upsert, updating existing key : ' + rec[keyfld]);
 					  // sobjs[exist] = rec
 					  // real store merges the data!
-					  for (elidx in rec) {
+					  for (var elidx in rec) {
 						  sobjs[exist][elidx] = rec[elidx];
 					  }
 					  
@@ -428,7 +428,9 @@ angular.module('sfdata.service', ['sfdata.constants'])
         }	
         
         // ----------------------- insert function
-        var _insert = function(obj, objdata) {
+        var _insert = function(obj, objdata, localOnly) {
+        	if (!localOnly) localOnly = false;
+        	
         	if (!_creds) {
         		console.log ('we dont have the credentials from the cordova container, so use hardwired!');
         		sess = _sfdccreds.session_api;
@@ -474,7 +476,7 @@ angular.module('sfdata.service', ['sfdata.constants'])
         		return ssDeffer.promise;
         	}
         	
-        	if (_online) {
+        	if (_online && !localOnly) {
         		console.log ('online upsert');
         		var olDeffer = $q.defer();
         		
